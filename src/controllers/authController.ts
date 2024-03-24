@@ -4,15 +4,17 @@ import { compare, hashSync } from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { JWT_SECRET,expiration } from '../secrets';
 import { ROLE } from '@prisma/client';
+import { applicantNotice } from '../services/applicantMail';
+import { generateApplicantID } from '../utils/genApplicantId';
 
 
 
 
 export const signup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-      const { username, email, password, phoneNumber } = req.body;
 
-      // Check if the email is already registered
+      const { username, email, password, phoneNumber } = req.body;
+      const newApplicantId = await generateApplicantID()
       const existingUserByEmail = await db.user.findFirst({
           where: {
               email: email
@@ -42,12 +44,13 @@ export const signup = async (req: Request, res: Response, next: NextFunction): P
           data: {
               username: username,
               email: email,
+              staffId:newApplicantId,
               phoneNumber: phoneNumber,
               password: hashedPassword,
               role: ROLE.APPLICANT
           }
       });
-
+      await applicantNotice(username,newUser.email,phoneNumber);
       // Create JWT token
       const token: string = jwt.sign({ userId: newUser.id, role: newUser.role }, JWT_SECRET, {
           expiresIn: expiration

@@ -22,28 +22,68 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.login = void 0;
+exports.login = exports.signup = void 0;
 const db_1 = __importDefault(require("../dbConfig/db"));
 const bcrypt_1 = require("bcrypt");
 const jwt = __importStar(require("jsonwebtoken"));
 const secrets_1 = require("../secrets");
-const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+const client_1 = require("@prisma/client");
+const applicantMail_1 = require("../services/applicantMail");
+const genApplicantId_1 = require("../utils/genApplicantId");
+const applicantId = await (0, genApplicantId_1.generateApplicantID)();
+const signup = async (req, res, next) => {
+    try {
+        const { username, email, password, phoneNumber } = req.body;
+        // Check if the email is already registered
+        const existingUserByEmail = await db_1.default.user.findFirst({
+            where: {
+                email: email
+            }
+        });
+        if (existingUserByEmail) {
+            throw new Error('Email is already registered');
+        }
+        // Check if the phone number is already registered
+        const existingUserByPhoneNumber = await db_1.default.user.findFirst({
+            where: {
+                phoneNumber: phoneNumber
+            }
+        });
+        if (existingUserByPhoneNumber) {
+            throw new Error('Phone number is already registered');
+        }
+        // Hash the password
+        const hashedPassword = (0, bcrypt_1.hashSync)(password, 10);
+        // Create the user
+        const newUser = await db_1.default.user.create({
+            data: {
+                username: username,
+                email: email,
+                phoneNumber: phoneNumber,
+                password: hashedPassword,
+                role: client_1.ROLE.APPLICANT
+            }
+        });
+        await (0, applicantMail_1.applicantNotice)(username, newUser.email, phoneNumber);
+        // Create JWT token
+        const token = jwt.sign({ userId: newUser.id, role: newUser.role }, secrets_1.JWT_SECRET, {
+            expiresIn: secrets_1.expiration
+        });
+        res.json({ user: { ...newUser, password: undefined }, token });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.signup = signup;
+const login = async (req, res, next) => {
     try {
         const { emailOrPhone, password } = req.body;
-        const user = yield db_1.default.user.findFirst({
+        const user = await db_1.default.user.findFirst({
             where: {
                 OR: [{ phoneNumber: emailOrPhone }, { email: emailOrPhone }]
             }
@@ -51,7 +91,7 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
         if (!user) {
             throw new Error('Invalid email or password');
         }
-        const isPasswordValid = yield (0, bcrypt_1.compare)(password, user.password);
+        const isPasswordValid = await (0, bcrypt_1.compare)(password, user.password);
         if (!isPasswordValid) {
             throw new Error('Invalid email or password');
         }
@@ -59,10 +99,10 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
         const token = jwt.sign({ userId: user.id, role: user.role }, secrets_1.JWT_SECRET, {
             expiresIn: secrets_1.expiration
         });
-        res.json({ user: Object.assign(Object.assign({}, user), { password: undefined, changePassword }), token });
+        res.json({ user: { ...user, password: undefined, changePassword }, token });
     }
     catch (error) {
         next(error);
     }
-});
+};
 exports.login = login;

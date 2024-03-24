@@ -55,6 +55,7 @@ export async function seedScript() {
       email: email,
       phoneNumber: phoneNumber,
       password: hashedPassword,
+      staffId:"Chief-001",
       role: ROLE.ADMIN,
       changePassword:false
     }

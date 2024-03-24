@@ -24,11 +24,19 @@ model User {
   email          String  @unique
   password       String
   role           ROLE
+  staffId        String  @unique
   phoneNumber    String  @unique
   changePassword Boolean @default(true)
 }
 
 model Admin {
-  id    Int    @id @default(autoincrement())
-  email String @unique
+  id      Int    @id @default(autoincrement())
+  staffId String @unique
+  email   String @unique
+}
+
+model Applicant {
+  id          Int    @id @default(autoincrement())
+  email       String @unique
+  applicantId String @unique
 }

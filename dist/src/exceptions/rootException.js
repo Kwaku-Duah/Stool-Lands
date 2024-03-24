@@ -2,6 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ErrorCode = exports.HttpException = void 0;
 class HttpException extends Error {
+    message;
+    errorCode;
+    statusCode;
+    errors;
     constructor(message, errorCode, statusCode, error) {
         super(message);
         this.message = message;

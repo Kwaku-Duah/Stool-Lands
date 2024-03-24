@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -19,38 +10,52 @@ const db_1 = __importDefault(require("../src/dbConfig/db"));
 const logMessage = (message) => {
     process.stdout.write(`${message}\n`);
 };
-const email = 'adminEmail.org';
-function seedScript() {
-    return __awaiter(this, void 0, void 0, function* () {
-        // Check if the user with the given email already exists
-        const existingUser = yield db_1.default.user.findFirst({
+const email = 'duah229@gmail.com';
+const phoneNumber = '233-542370701';
+async function seedScript() {
+    // Check if the user with the given email already exists
+    const existingUserByEmail = await db_1.default.user.findFirst({
+        where: {
+            email: email
+        }
+    });
+    if (existingUserByEmail) {
+        // If the user exists, delete it
+        await db_1.default.user.delete({
             where: {
                 email: email
             }
         });
-        if (existingUser) {
-            // If the user exists, delete it
-            yield db_1.default.user.delete({
-                where: {
-                    email: email
-                }
-            });
-            logMessage('Existing user deleted.');
+        logMessage('Existing user with email deleted.');
+    }
+    // Check if the user with the given phoneNumber already exists
+    const existingUserByPhoneNumber = await db_1.default.user.findFirst({
+        where: {
+            phoneNumber: phoneNumber
         }
-        // Create the user with the specified details
-        const hashedPassword = (0, bcrypt_1.hashSync)('$nanaKwakuDollars', 10);
-        const phoneNumber = '233-542370701';
-        yield db_1.default.user.create({
-            data: {
-                username: "Nana Kwaku Duah",
-                email: email,
-                phoneNumber: phoneNumber,
-                password: hashedPassword,
-                role: client_1.ROLE.ADMIN
+    });
+    if (existingUserByPhoneNumber) {
+        // If the user exists, delete it
+        await db_1.default.user.delete({
+            where: {
+                phoneNumber: phoneNumber
             }
         });
-        logMessage('User created successfully.');
+        logMessage('Existing user with phoneNumber deleted.');
+    }
+    // Create the user with the specified details
+    const hashedPassword = (0, bcrypt_1.hashSync)('$nanaKwakuDollars', 10);
+    await db_1.default.user.create({
+        data: {
+            username: "Nana Kwaku Duah",
+            email: email,
+            phoneNumber: phoneNumber,
+            password: hashedPassword,
+            role: client_1.ROLE.ADMIN,
+            changePassword: false
+        }
     });
+    logMessage('User created successfully.');
 }
 exports.seedScript = seedScript;
 seedScript();
