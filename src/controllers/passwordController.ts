@@ -58,8 +58,10 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       throw new Error('New password and confirm password do not match');
     }
 
-    if (newPassword.length < 8) {
-      throw new Error('Password must be at least 8 characters long');
+    // Ensure password meets complexity requirements
+    const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+      throw new Error('Password must contain at least 8 characters including letters, numbers, and special symbols');
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);

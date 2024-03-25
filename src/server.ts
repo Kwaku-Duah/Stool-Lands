@@ -3,6 +3,7 @@ import { PORT } from './secrets';
 import rootRouter from './routes';
 import cors from 'cors';
 import helmet from 'helmet';
+import swaggerDoc from './utils/swaggerDoc';
 import { seedScript } from '../prisma/seedScript';
 import { existsSync, writeFileSync } from 'fs';
 
@@ -19,11 +20,10 @@ app.use(
 );
 
 app.use('/', rootRouter);
-
+swaggerDoc(app);
 
 
 const seedFlagFile = '.seeded';
-
 if (!existsSync(seedFlagFile)) {
   seedScript();
   writeFileSync(seedFlagFile, '');

@@ -1,6 +1,7 @@
 import { ROLE } from '@prisma/client';
 import db from '../dbConfig/db';
 
+
 export const generateApplicantID = async (): Promise<string> => {
   try {
     // Find the last applicant
@@ -14,7 +15,6 @@ export const generateApplicantID = async (): Promise<string> => {
 
     // Increment the last user's ID
     const newUserId = lastUserId + 1;
-
     // Generate a new applicant ID
     const newApplicantId = `APPLICANT-${String(newUserId).padStart(5, '0')}`;
 
