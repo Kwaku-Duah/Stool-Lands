@@ -4,9 +4,10 @@
   "description": "This is a stool-land web application",
   "main": "server.ts",
   "scripts": {
-    "start": "nodemon ./dist/src/server.js",
+    "start": "node ./dist/src/server.js",
     "dev": "tsnd --respawn ./src/server.ts",
     "build": "tsc -p .",
+    "prisma:generate": "npx prisma generate",
     "test": "jest"
   },
   "repository": "git@github.com:amt-kwaku-duah/Stool-Lands.git",

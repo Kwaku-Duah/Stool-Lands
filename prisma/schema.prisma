@@ -40,4 +40,3 @@ model Applicant {
   email       String @unique
   applicantId String @unique
 }
-
