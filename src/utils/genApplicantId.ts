@@ -10,8 +10,8 @@ export const generateApplicantID = async (): Promise<string> => {
       orderBy: { staffId: 'desc' }
     });
 
-    // Get the last user's ID or default to 0
     const lastUserId = lastApplicant ? parseInt(lastApplicant.staffId.split('-')[1]) : 0;
+
 
     // Increment the last user's ID
     const newUserId = lastUserId + 1;

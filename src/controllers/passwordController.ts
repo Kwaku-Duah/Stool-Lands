@@ -25,14 +25,14 @@ export const forgotReset = async (req: Request, res: Response): Promise<void> =>
         email: user.email,
         id: user.id
       };
-      const token = jwt.sign(payload, JWT_SECRET);
+      const token = jwt.sign(payload, JWT_SECRET!);
       const encodedToken = encode(token);
 
       const frontendURL = process.env.FRONTEND_ORIGIN || '';
 
       const link = `${frontendURL}/resetPswd/${user.id}/${encodedToken}`;
 
-      await sendPasswordResetEmail(user.username, user.email, link); // Ensure email is passed as the second argument
+      await sendPasswordResetEmail(user.username, user.email, link);
       console.log("user email", user.email)
 
       res.status(200).json({ message: 'Password reset link has been sent to your email', link });
@@ -42,6 +42,7 @@ export const forgotReset = async (req: Request, res: Response): Promise<void> =>
     res.status(statusCode).json({ message: (error as Error).message || 'Bad Request' });
   }
 };
+
 
 
 
