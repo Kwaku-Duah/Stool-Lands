@@ -9,7 +9,7 @@ const secrets_1 = require("../secrets");
 const sendOTP = async function (phoneNumber) {
     try {
         // Set OTP expiration time (10 minutes from now)
-        const expirationTime = Date.now() + 10 * 60 * 1000; // 10 minutes * 60 seconds * 1000 milliseconds
+        const expirationTime = Date.now() + 10 * 60 * 1000;
         const resp = await (0, node_fetch_1.default)(`https://api-devp-otp-2704.hubtel.com/otp/send`, {
             method: 'POST',
             headers: {

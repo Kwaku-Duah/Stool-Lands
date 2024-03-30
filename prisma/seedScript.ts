@@ -7,10 +7,9 @@ const logMessage = (message: string) => {
 };
 
 const email = 'duah229@gmail.com';
-const phoneNumber = '233-542370701';
+const phoneNumber = '233542370701';
 
 export async function seedScript() {
-  // Check if the user with the given email already exists
   const existingUserByEmail = await db.user.findFirst({
     where: {
       email: email
@@ -18,7 +17,6 @@ export async function seedScript() {
   });
 
   if (existingUserByEmail) {
-    // If the user exists, delete it
     await db.user.delete({
       where: {
         email: email
@@ -28,7 +26,7 @@ export async function seedScript() {
     logMessage('Existing user with email deleted.');
   }
 
-  // Check if the user with the given phoneNumber already exists
+
   const existingUserByPhoneNumber = await db.user.findFirst({
     where: {
       phoneNumber: phoneNumber
@@ -36,7 +34,7 @@ export async function seedScript() {
   });
 
   if (existingUserByPhoneNumber) {
-    // If the user exists, delete it
+
     await db.user.delete({
       where: {
         phoneNumber: phoneNumber
@@ -46,18 +44,16 @@ export async function seedScript() {
     logMessage('Existing user with phoneNumber deleted.');
   }
 
-  // Create the user with the specified details
   const hashedPassword = hashSync('$nanaKwakuDollars', 10);
 
   await db.user.create({
     data: {
-      username:"Nana Kwaku Duah",
+      name:"Nana Kwaku Duah",
       email: email,
       phoneNumber: phoneNumber,
       password: hashedPassword,
-      staffId:"Chief-001",
+      occupation: "ADMINISTRATOR",
       role: ROLE.ADMIN,
-      changePassword:false
     }
   });
 

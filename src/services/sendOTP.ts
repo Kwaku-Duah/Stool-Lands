@@ -4,7 +4,7 @@ import { username, password, senderId } from '../secrets';
 export const sendOTP = async function (phoneNumber: string): Promise<{ requestId: string; prefix: string; expirationTime: number } | null> {
     try {
         // Set OTP expiration time (10 minutes from now)
-        const expirationTime = Date.now() + 10 * 60 * 1000; // 10 minutes * 60 seconds * 1000 milliseconds
+        const expirationTime = Date.now() + 10 * 60 * 1000;
 
         const resp = await fetch(
             `https://api-devp-otp-2704.hubtel.com/otp/send`,

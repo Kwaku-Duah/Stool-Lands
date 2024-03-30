@@ -7,6 +7,4 @@ const authRoutes = (0, express_1.Router)();
 authRoutes.post('/signup', (0, erroHandler_1.errorHandler)(authController_1.signup));
 authRoutes.post('/login', (0, erroHandler_1.errorHandler)(authController_1.login));
 authRoutes.post('/logout', (0, erroHandler_1.errorHandler)(authController_1.logout));
-authRoutes.post('/verify', authController_1.verifyOTPController);
-authRoutes.post('/resend-otp', authController_1.resendOTPController);
 exports.default = authRoutes;

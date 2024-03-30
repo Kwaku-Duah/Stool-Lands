@@ -1,6 +1,5 @@
 import fetch from 'node-fetch';
 import { username, password, senderId } from '../secrets';
-import { message } from '../templates/smsTemplate'; // Import the message from the template
 
 export async function sendSMS(phoneNumber: string,message:string) {
   try {
@@ -10,7 +9,7 @@ export async function sendSMS(phoneNumber: string,message:string) {
     const resp = await fetch(url);
 
     const data = await resp.json();
-    console.log(data); // Log the response body
+    console.log(data);
   } catch (error) {
     console.error("Error sending SMS:", error);
   }

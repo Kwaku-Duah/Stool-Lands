@@ -8,7 +8,7 @@ paths:
   /auth/signup:
     post:
       summary: Sign up a new user
-      description: Registers a new user with the provided username, email, password, and phone number.
+      description: Registers a new user with the provided name, email, phone number, occupation, password, and confirmPassword.
       requestBody:
         required: true
         content:
@@ -16,19 +16,25 @@ paths:
             schema:
               type: object
               properties:
-                username:
+                name:
                   type: string
-                  description: The username of the new user.
+                  description: The name of the new user.
                 email:
                   type: string
                   format: email
-                  description: The email address of the new user.
-                password:
-                  type: string
-                  description: The password of the new user.
+                  description: The email address of the new user (optional).
                 phoneNumber:
                   type: string
                   description: The phone number of the new user.
+                occupation:
+                  type: string
+                  description: The occupation of the new user.
+                newPassword:
+                  type: string
+                  description: The new password for the new user.
+                confirmPassword:
+                  type: string
+                  description: The confirmation of the new password for the new user.
       responses:
         '200':
           description: Successful registration
@@ -37,28 +43,9 @@ paths:
               schema:
                 type: object
                 properties:
-                  user:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        description: The unique identifier of the user.
-                      username:
-                        type: string
-                        description: The username of the user.
-                      email:
-                        type: string
-                        format: email
-                        description: The email address of the user.
-                      phoneNumber:
-                        type: string
-                        description: The phone number of the user.
-                      role:
-                        type: string
-                        description: The role of the user.
-                  token:
+                  message:
                     type: string
-                    description: The JWT token for the authenticated user.
+                    description: Confirmation message of successful signup.
         '400':
           description: Bad request or validation error
           content:
@@ -70,10 +57,11 @@ paths:
                     type: string
                     description: Error message describing the issue.
       security: []
+
 /auth/login:
   post:
-    summary: User login
-    description: Authenticates a user with the provided email or phone number and password.
+    summary: Log in a user
+    description: Logs in a user with the provided email or phone number and password.
     requestBody:
       required: true
       content:
@@ -97,6 +85,7 @@ paths:
               properties:
                 user:
                   type: object
+                  description: The user object with sensitive information removed.
                   properties:
                     id:
                       type: integer
@@ -114,17 +103,14 @@ paths:
                     role:
                       type: string
                       description: The role of the user.
-                    changePassword:
-                      type: boolean
-                      description: Indicates whether the user needs to change their password.
                 token:
                   type: string
                   description: The JWT token for the authenticated user.
-                expirationTime:
-                  type: integer
-                  description: The expiration time of the JWT token in milliseconds.
+                expiration:
+                  type: string
+                  description: The expiration time of the JWT token.
       '400':
-        description: Bad request or authentication error
+        description: Bad request or validation error
         content:
           application/json:
             schema:
@@ -133,11 +119,11 @@ paths:
                 message:
                   type: string
                   description: Error message describing the issue.
-    security: []
+
 /auth/logout:
   post:
-    summary: User logout
-    description: Clears the authentication token (JWT) from local storage, effectively logging out the user.
+    summary: Log out a user
+    description: Logs out a user by removing the JWT token from the local storage.
     responses:
       '200':
         description: Successful logout
@@ -148,9 +134,9 @@ paths:
               properties:
                 message:
                   type: string
-                  description: Message indicating successful logout.
-      '500':
-        description: Internal server error
+                  description: Confirmation message of successful logout.
+      '400':
+        description: Bad request or unexpected error
         content:
           application/json:
             schema:
@@ -158,12 +144,12 @@ paths:
               properties:
                 message:
                   type: string
-                  description: Error message indicating the reason for the failure.
+                  description: Error message describing the issue.
 
 /password/forgot:
   post:
-    summary: Forgot password
-    description: Sends a password reset link to the user's email address.
+    summary: Send password reset link
+    description: Sends a password reset link to the provided email address.
     requestBody:
       required: true
       content:
@@ -185,10 +171,10 @@ paths:
               properties:
                 message:
                   type: string
-                  description: Message indicating that the password reset link has been sent to the user's email.
+                  description: Confirmation message that the password reset link has been sent to the user's email.
                 link:
                   type: string
-                  description: The password reset link sent to the user's email address.
+                  description: The generated password reset link.
       '400':
         description: Bad request or validation error
         content:
@@ -202,8 +188,8 @@ paths:
 
 /password/reset:
   post:
-    summary: Reset password
-    description: Resets the user's password with the provided new password.
+    summary: Reset user password
+    description: Resets the password for a user identified by their userId.
     requestBody:
       required: true
       content:
@@ -213,16 +199,16 @@ paths:
             properties:
               userId:
                 type: integer
-                description: The ID of the user whose password is being reset.
+                description: The ID of the user whose password will be reset.
               newPassword:
                 type: string
                 description: The new password for the user.
               confirmPassword:
                 type: string
-                description: The confirmation of the new password.
+                description: The confirmation of the new password for the user.
     responses:
       '200':
-        description: Password reset successful
+        description: Password changed successfully
         content:
           application/json:
             schema:
@@ -230,10 +216,126 @@ paths:
               properties:
                 message:
                   type: string
-                  description: Message indicating that the password has been reset successfully.
+                  description: Confirmation message that the password has been changed successfully.
                 success:
                   type: boolean
-                  description: Indicates whether the password reset was successful.
+                  description: Indicates whether the password change was successful.
+      '400':
+        description: Bad request or validation error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: Error message describing the issue.
+/password/otp-send:
+  post:
+    summary: Send OTP for password reset
+    description: Sends a one-time password (OTP) to the provided phone number for password reset.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              phoneNumber:
+                type: string
+                description: The phone number of the user requesting a password reset OTP.
+    responses:
+      '200':
+        description: OTP sent successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: Confirmation message that the OTP has been sent to the user's phone.
+      '400':
+        description: Bad request or validation error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: Error message describing the issue.
+
+/password/otp-verify:
+  post:
+    summary: Verify OTP for password reset
+    description: Verifies the one-time password (OTP) provided for password reset.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              requestId:
+                type: string
+                description: The ID of the OTP request.
+              prefix:
+                type: string
+                description: The prefix of the OTP (e.g.phone number).
+              code:
+                type: string
+                description: The OTP code to be verified.
+    responses:
+      '200':
+        description: OTP verified successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  description: Indicates whether the OTP verification was successful.
+                message:
+                  type: string
+                  description: Confirmation message that the OTP has been verified successfully.
+      '400':
+        description: Bad request or validation error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  description: Indicates whether the OTP verification was successful.
+                message:
+                  type: string
+                  description: Error message describing the issue.
+
+/password/resend-otp:
+  post:
+    summary: Resend OTP for password reset
+    description: Resends the one-time password (OTP) for password reset.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              requestId:
+                type: string
+                description: The ID of the OTP request to be resent.
+    responses:
+      '200':
+        description: OTP resent successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Response containing information about the resent OTP.
       '400':
         description: Bad request or validation error
         content:

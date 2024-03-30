@@ -8,11 +8,11 @@ const fs_1 = require("fs");
 const handlebars_1 = __importDefault(require("handlebars"));
 const secrets_1 = require("../secrets");
 const mailer_1 = require("../utils/mailer");
-const sendPasswordResetEmail = async (username, email, link) => {
+const sendPasswordResetEmail = async (name, email, link) => {
     const location = await fs_1.promises.readFile('src/templates/forgotEmail.html', 'utf-8');
     const template = handlebars_1.default.compile(location);
     const placeHolders = {
-        username: username,
+        name: name,
         email: email,
         frontendURL: link
     };

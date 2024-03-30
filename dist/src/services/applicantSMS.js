@@ -12,7 +12,7 @@ async function sendSMS(phoneNumber, message) {
         const url = `https://smsc.hubtel.com/v1/messages/send?clientsecret=${secrets_1.password}&clientid=${secrets_1.username}&from=${secrets_1.senderId}&to=${phoneNumber}&content=${encodeURIComponent(message)}`;
         const resp = await (0, node_fetch_1.default)(url);
         const data = await resp.json();
-        console.log(data); // Log the response body
+        console.log(data);
     }
     catch (error) {
         console.error("Error sending SMS:", error);

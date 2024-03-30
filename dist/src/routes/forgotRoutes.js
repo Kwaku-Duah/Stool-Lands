@@ -6,4 +6,7 @@ const passwordController_1 = require("../controllers/passwordController");
 const forgotRoute = (0, express_1.Router)();
 forgotRoute.post('/forgot', (0, erroHandler_1.errorHandler)(passwordController_1.forgotReset));
 forgotRoute.post('/reset', (0, erroHandler_1.errorHandler)(passwordController_1.changePassword));
+forgotRoute.post('/otp-send', (0, erroHandler_1.errorHandler)(passwordController_1.OTPSend));
+forgotRoute.post('/otp-verify', (0, erroHandler_1.errorHandler)(passwordController_1.verifyOTPController));
+forgotRoute.post('/resend-otp', (0, erroHandler_1.errorHandler)(passwordController_1.resendOTPController));
 exports.default = forgotRoute;

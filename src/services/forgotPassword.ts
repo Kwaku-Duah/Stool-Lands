@@ -3,12 +3,12 @@ import handlebar from 'handlebars';
 import { ADMIN_MAIL } from '../secrets';
 import { transporter } from '../utils/mailer';
 
-export const sendPasswordResetEmail = async (username: string,email: string, link: string) => {
+export const sendPasswordResetEmail = async (name: string,email: string, link: string) => {
   const location = await fsPromises.readFile('src/templates/forgotEmail.html', 'utf-8');
   const template = handlebar.compile(location);
 
   const placeHolders = {
-    username:username,
+    name:name,
     email:email,
     frontendURL: link
   };

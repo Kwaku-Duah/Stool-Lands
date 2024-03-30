@@ -26,13 +26,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changePassword = exports.forgotReset = void 0;
+exports.resendOTPController = exports.verifyOTPController = exports.OTPSend = exports.changePassword = exports.forgotReset = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const db_1 = __importDefault(require("../dbConfig/db"));
 const jwt = __importStar(require("jsonwebtoken"));
 const secrets_1 = require("../secrets");
 const base64_url_1 = require("base64-url");
 const forgotPassword_1 = require("../services/forgotPassword");
+const sendOTP_1 = require("../services/sendOTP");
+const resendOTP_1 = require("../services/resendOTP");
 const forgotReset = async (req, res) => {
     try {
         const { email } = req.body;
@@ -55,7 +57,7 @@ const forgotReset = async (req, res) => {
             const encodedToken = (0, base64_url_1.encode)(token);
             const frontendURL = process.env.FRONTEND_ORIGIN || '';
             const link = `${frontendURL}/resetPswd/${user.id}/${encodedToken}`;
-            await (0, forgotPassword_1.sendPasswordResetEmail)(user.username, user.email, link);
+            await (0, forgotPassword_1.sendPasswordResetEmail)(user.name, email, link);
             console.log("user email", user.email);
             res.status(200).json({ message: 'Password reset link has been sent to your email', link });
         }
@@ -85,7 +87,6 @@ const changePassword = async (req, res) => {
             where: { id: userId },
             data: {
                 password: hashedPassword,
-                changePassword: false
             }
         });
         res.status(200).json({ message: 'Password changed successfully', success: true });
@@ -96,3 +97,58 @@ const changePassword = async (req, res) => {
     }
 };
 exports.changePassword = changePassword;
+const OTPSend = async (req, res) => {
+    try {
+        const { phoneNumber } = req.body;
+        const user = await db_1.default.user.findFirst({
+            where: {
+                phoneNumber
+            }
+        });
+        if (!user) {
+            res.status(400).json({ error: 'INVALID_PHONE_NUMBER', message: 'Phone number does not exist' });
+            return;
+        }
+        const otpResponse = await (0, sendOTP_1.sendOTP)(phoneNumber);
+        if (!otpResponse) {
+            throw new Error('Error sending OTP');
+        }
+        console.log('OTP sent successfully');
+        const { requestId, prefix } = otpResponse;
+        res.json({ userId: user.id, requestId, prefix });
+    }
+    catch (error) {
+        console.error('Error sending OTP:', error);
+        res.status(500).json({ error: 'INTERNAL_SERVER_ERROR', message: error || 'Error sending OTP' });
+    }
+};
+exports.OTPSend = OTPSend;
+const verifyOTPController = async (req, res, next) => {
+    try {
+        const { requestId, prefix, code } = req.body;
+        console.log(req.body);
+        const isOTPVerified = await (0, sendOTP_1.verifyOTP)(requestId, prefix, code);
+        console.log(isOTPVerified);
+        if (isOTPVerified) {
+            res.json({ success: true, message: 'OTP verified successfully' });
+        }
+        else {
+            res.status(400).json({ success: false, message: 'token has expired' });
+        }
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.verifyOTPController = verifyOTPController;
+const resendOTPController = async (req, res, next) => {
+    try {
+        const { requestId } = req.body;
+        const otpResponse = await (0, resendOTP_1.resendOTP)(requestId);
+        res.json(otpResponse);
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.resendOTPController = resendOTPController;

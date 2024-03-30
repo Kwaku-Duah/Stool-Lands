@@ -4,36 +4,35 @@ import { ADMIN_MAIL, FRONTEND_ORIGIN } from '../secrets';
 import { transporter } from '../utils/mailer';
 import { sendSMS } from './applicantSMS';
 
-export const applicantNotice = async (username:string, email:string, phoneNumber:string, staffId:string) => {
+export const applicantNotice = async (name:string, email:string, phoneNumber:string) => {
   try {
-    // Read HTML template file
     const location = await fsPromises.readFile('src/templates/applicantEmail.html', 'utf-8');
     const template = handlebars.compile(location);
 
-    // Define placeholders for the template
     const placeHolders = {
-      username: username,
-      staffId: staffId,
+      name: name,
       email: email,
       phoneNumber: phoneNumber,
       frontURL: FRONTEND_ORIGIN
     };
 
-    // Render HTML message
     const htmlMessage = template(placeHolders);
 
-    // Send email
-    await transporter.sendMail({
-      from: ADMIN_MAIL,
-      to: email,
-      subject: "Welcome to Pakyi No. 2 Stool Lands",
-      text: 'Hello',
-      html: htmlMessage
-    });
+    if (email) {
+      // Send email
+      await transporter.sendMail({
+        from: ADMIN_MAIL,
+        to: email,
+        subject: "Welcome to Pakyi No. 2 Stool Lands",
+        text: 'Hello',
+        html: htmlMessage
+      });
+    } else {
+      console.log("No email provided. Skipping email sending.");
+    }
 
-    // Extract SMS content from HTML message (if needed)
     const smsContent = htmlMessage.replace(/(<([^>]+)>)/gi, '');
-    console.log(smsContent)
+    console.log(smsContent);
 
     // Send SMS
     await sendSMS(phoneNumber, smsContent);
