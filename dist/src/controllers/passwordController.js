@@ -148,6 +148,7 @@ const resendOTPController = async (req, res, next) => {
         res.json(otpResponse);
     }
     catch (error) {
+        res.status(500).json({ message: 'An unexpected error occurred while processing your request.' });
         next(error);
     }
 };

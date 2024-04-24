@@ -5,6 +5,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import swaggerDoc from './utils/swaggerDoc';
 import { seedScript } from '../prisma/seedScript';
+import { seedPayableServices } from '../prisma/service'
 import { existsSync, writeFileSync } from 'fs';
 
 const app = express();
@@ -20,12 +21,17 @@ app.use(
 );
 
 app.use('/', rootRouter);
+app.get('/hello', (req, res) => {
+  res.send('Hello to the pakyi lands, you are through');
+});
+
 swaggerDoc(app);
 
 
 const seedFlagFile = '.seeded';
 if (!existsSync(seedFlagFile)) {
   seedScript();
+  seedPayableServices();
   writeFileSync(seedFlagFile, '');
 }
 app.listen(PORT, () => {});

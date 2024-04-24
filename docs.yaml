@@ -3,7 +3,6 @@ info:
   version: 1.0.0
   title: Your API Title
   description: Your API Description
-
 paths:
   /auth/signup:
     post:
@@ -53,10 +52,29 @@ paths:
               schema:
                 type: object
                 properties:
-                  message:
+                  error:
                     type: string
                     description: Error message describing the issue.
-      security: []
+        '409':
+          description: Conflict - Email or phone number already registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message indicating that the email or phone number is already registered.
+        '422':
+          description: Unprocessable Entity - Validation error for password requirements
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message indicating password validation failure.
 
 /auth/login:
   post:
@@ -116,9 +134,19 @@ paths:
             schema:
               type: object
               properties:
-                message:
+                error:
                   type: string
                   description: Error message describing the issue.
+      '401':
+        description: Unauthorized - Invalid email or password
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message indicating invalid email or password.
 
 /auth/logout:
   post:
@@ -142,9 +170,10 @@ paths:
             schema:
               type: object
               properties:
-                message:
+                error:
                   type: string
                   description: Error message describing the issue.
+
 
 /password/forgot:
   post:
@@ -230,6 +259,8 @@ paths:
                 message:
                   type: string
                   description: Error message describing the issue.
+
+                  
 /password/otp-send:
   post:
     summary: Send OTP for password reset
@@ -347,3 +378,1299 @@ paths:
                   type: string
                   description: Error message describing the issue.
 
+/add/secretary:
+  post:
+    summary: Create a new secretary
+    description: Creates a new secretary with the provided details.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The name of the secretary.
+              email:
+                type: string
+                format: email
+                description: The email address of the secretary.
+              phoneNumber:
+                type: string
+                description: The phone number of the secretary.
+              occupation:
+                type: string
+                description: The occupation of the secretary.
+              newPassword:
+                type: string
+                description: The new password for the secretary account.
+              confirmPassword:
+                type: string
+                description: The confirmation of the new password.
+    responses:
+      '201':
+        description: Secretary created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: Success message indicating the secretary creation.
+                secretary:
+                  type: object
+                  description: Details of the created secretary.
+      '400':
+        description: Bad request or validation error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message describing the issue.
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message indicating the internal server error.
+
+/add/inspector:
+  post:
+    summary: Create a new inspector
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The name of the inspector.
+              email:
+                type: string
+                format: email
+                description: The email address of the inspector.
+              phoneNumber:
+                type: string
+                description: The phone number of the inspector.
+              occupation:
+                type: string
+                description: The occupation of the inspector.
+              newPassword:
+                type: string
+                description: The new password for the inspector's account.
+              confirmPassword:
+                type: string
+                description: Confirmation of the new password.
+    responses:
+      '201':
+        description: Inspector created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: A success message indicating that the inspector was created successfully.
+                inspector:
+                  type: object
+                  description: Information about the newly created inspector.
+      '400':
+        description: Bad request or validation error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message describing the issue.
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message indicating an internal server error occurred.
+/add/chief:
+  post:
+    summary: Create a new chief
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The name of the chief.
+              email:
+                type: string
+                format: email
+                description: The email address of the chief.
+              phoneNumber:
+                type: string
+                description: The phone number of the chief.
+              occupation:
+                type: string
+                description: The occupation of the chief.
+              newPassword:
+                type: string
+                description: The new password for the chief's account.
+              confirmPassword:
+                type: string
+                description: Confirmation of the new password.
+    responses:
+      '201':
+        description: Chief created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: A success message indicating that the chief was created successfully.
+                chief:
+                  type: object
+                  description: Information about the newly created chief.
+      '400':
+        description: Bad request or validation error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message describing the issue.
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message indicating an internal server error occurred.
+/transaction/callback:
+  post:
+    summary: Handle payment callback
+    description: Endpoint to handle payment callback requests
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              ResponseCode:
+                type: string
+                description: The response code from the payment provider.
+              Status:
+                type: string
+                description: The status of the payment.
+              Data:
+                type: object
+                description: Additional data associated with the payment callback.
+    responses:
+      '200':
+        description: Payment callback received successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: string
+                  description: Indicates whether the payment callback was successful.
+                message:
+                  type: string
+                  description: A success message indicating that the payment callback was received successfully.
+      '500':
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message indicating an internal server error occurred.
+/transaction/exist:
+  post:
+    summary: Check if unused form exists for user
+    description: Endpoint to check if there exists an unused form for the authenticated user.
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  description: Indicates whether an unused form exists for the user.
+                message:
+                  type: string
+                  description: Message indicating whether an unused form exists for the user.
+      '401':
+        description: User not authenticated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  description: Indicates whether the user is authenticated.
+                message:
+                  type: string
+                  description: Error message indicating that the user is not authenticated.
+      '500':
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  description: Indicates whether an internal server error occurred.
+                message:
+                  type: string
+                  description: Error message indicating an internal server error occurred.
+/transaction/state:
+  post:
+    summary: Check transaction status
+    description: Endpoint to check the status of a transaction using its client reference.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              clientReference:
+                type: string
+                description: The client reference of the transaction to check.
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  description: Indicates whether the transaction status was successfully retrieved.
+                transactionStatus:
+                  type: string
+                  description: The status of the transaction.
+      '400':
+        description: Invalid transaction status
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  description: Indicates that the transaction status is invalid.
+                message:
+                  type: string
+                  description: Error message indicating the transaction status is invalid.
+      '404':
+        description: Failed to find transaction
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  description: Indicates that the transaction could not be found.
+                message:
+                  type: string
+                  description: Error message indicating the transaction could not be found.
+      '500':
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  description: Indicates whether an internal server error occurred.
+                message:
+                  type: string
+                  description: Error message indicating an internal server error occurred.
+/new/apply:
+  post:
+    summary: Fill application form
+    description: Endpoint to submit a new application form.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              applicantName:
+                type: string
+                description: Name of the applicant.
+              applicantDOB:
+                type: string
+                format: date
+                description: Date of birth of the applicant.
+              mailingAddress:
+                type: string
+                description: Mailing address of the applicant.
+              contactNumber:
+                type: string
+                description: Contact number of the applicant.
+              emailAddress:
+                type: string
+                format: email
+                description: Email address of the applicant.
+              placeOfResidence:
+                type: string
+                description: Place of residence of the applicant.
+              hometown:
+                type: string
+                description: Hometown of the applicant.
+              maritalStatus:
+                type: string
+                description: Marital status of the applicant.
+              nextOfKin:
+                type: string
+                description: Next of kin of the applicant.
+              landLocality:
+                type: string
+                description: Locality of the land.
+              siteName:
+                type: string
+                description: Name of the site.
+              plotNumbers:
+                type: string
+                description: Plot numbers.
+              totalLandSize:
+                type: number
+                description: Total land size.
+              streetName:
+                type: string
+                description: Name of the street.
+              landTransferor:
+                type: string
+                description: Name of the land transferor.
+              dateOfOriginalTransfer:
+                type: string
+                format: date
+                description: Date of original land transfer.
+              purposeOfLand:
+                type: string
+                description: Purpose of the land.
+              contactOfTransferor:
+                type: string
+                description: Contact of the land transferor.
+              documents:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      description: Type of the document.
+                    image:
+                      type: string
+                      format: uri
+                      description: URL of the document image.
+                description: Array of documents uploaded.
+              payments:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    paymentType:
+                      type: string
+                      description: Type of payment.
+                    amount:
+                      type: number
+                      description: Amount of payment.
+                    paymentStatus:
+                      type: string
+                      description: Status of payment.
+                description: Array of payments made.
+    responses:
+      '201':
+        description: Application submitted successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: Success message indicating the application submission.
+                application:
+                  type: object
+                  description: Information about the submitted application.
+                  properties:
+                    uniqueFormID:
+                      type: string
+                      description: Unique ID of the application form.
+                    applicantName:
+                      type: string
+                      description: Name of the applicant.
+                    applicantDOB:
+                      type: string
+                      format: date
+                      description: Date of birth of the applicant.
+                    mailingAddress:
+                      type: string
+                      description: Mailing address of the applicant.
+                    contactNumber:
+                      type: string
+                      description: Contact number of the applicant.
+                    emailAddress:
+                      type: string
+                      format: email
+                      description: Email address of the applicant.
+                    placeOfResidence:
+                      type: string
+                      description: Place of residence of the applicant.
+                    hometown:
+                      type: string
+                      description: Hometown of the applicant.
+                    maritalStatus:
+                      type: string
+                      description: Marital status of the applicant.
+                    nextOfKin:
+                      type: string
+                      description: Next of kin of the applicant.
+                    landLocality:
+                      type: string
+                      description: Locality of the land.
+                    siteName:
+                      type: string
+                      description: Name of the site.
+                    plotNumbers:
+                      type: string
+                      description: Plot numbers.
+                    totalLandSize:
+                      type: number
+                      description: Total land size.
+                    streetName:
+                      type: string
+                      description: Name of the street.
+                    landTransferor:
+                      type: string
+                      description: Name of the land transferor.
+                    dateOfOriginalTransfer:
+                      type: string
+                      format: date
+                      description: Date of original land transfer.
+                    purposeOfLand:
+                      type: string
+                      description: Purpose of the land.
+                    contactOfTransferor:
+                      type: string
+                      description: Contact of the land transferor.
+                    documents:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            description: Type of the document.
+                          image:
+                            type: string
+                            format: uri
+                            description: URL of the document image.
+                      description: Array of documents uploaded.
+                    payments:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          paymentType:
+                            type: string
+                            description: Type of payment.
+                          amount:
+                            type: number
+                            description: Amount of payment.
+                          paymentStatus:
+                            type: string
+                            description: Status of payment.
+                      description: Array of payments made.
+                    status:
+                      type: string
+                      description: Status of the application.
+      '400':
+        description: Bad request or validation error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message indicating the bad request or validation error.
+      '401':
+        description: User not authenticated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: Error message indicating the user is not authenticated.
+      '404':
+        description: User not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message indicating the user was not found.
+      '500':
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message indicating an internal server error occurred.
+/new/applications:
+  get:
+    summary: Get forms created by user
+    description: Retrieve all forms created by the authenticated user.
+    responses:
+      '200':
+        description: Forms retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  description: Indicates whether the operation was successful.
+                forms:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      uniqueFormID:
+                        type: string
+                        description: Unique ID of the application form.
+                      applicantName:
+                        type: string
+                        description: Name of the applicant.
+                      applicantDOB:
+                        type: string
+                        format: date
+                        description: Date of birth of the applicant.
+                      mailingAddress:
+                        type: string
+                        description: Mailing address of the applicant.
+                      contactNumber:
+                        type: string
+                        description: Contact number of the applicant.
+                      emailAddress:
+                        type: string
+                        format: email
+                        description: Email address of the applicant.
+                      placeOfResidence:
+                        type: string
+                        description: Place of residence of the applicant.
+                      hometown:
+                        type: string
+                        description: Hometown of the applicant.
+                      maritalStatus:
+                        type: string
+                        description: Marital status of the applicant.
+                      nextOfKin:
+                        type: string
+                        description: Next of kin of the applicant.
+                      landLocality:
+                        type: string
+                        description: Locality of the land.
+                      siteName:
+                        type: string
+                        description: Name of the site.
+                      plotNumbers:
+                        type: string
+                        description: Plot numbers.
+                      totalLandSize:
+                        type: number
+                        description: Total land size.
+                      streetName:
+                        type: string
+                        description: Name of the street.
+                      landTransferor:
+                        type: string
+                        description: Name of the land transferor.
+                      dateOfOriginalTransfer:
+                        type: string
+                        format: date
+                        description: Date of original land transfer.
+                      purposeOfLand:
+                        type: string
+                        description: Purpose of the land.
+                      contactOfTransferor:
+                        type: string
+                        description: Contact of the land transferor.
+                      documents:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              description: Type of the document.
+                            image:
+                              type: string
+                              format: uri
+                              description: URL of the document image.
+                        description: Array of documents uploaded.
+                      payments:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            paymentType:
+                              type: string
+                              description: Type of payment.
+                            amount:
+                              type: number
+                              description: Amount of payment.
+                            paymentStatus:
+                              type: string
+                              description: Status of payment.
+                        description: Array of payments made.
+      '401':
+        description: User not authenticated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  description: Indicates whether the operation was successful.
+                message:
+                  type: string
+                  description: Error message indicating the user is not authenticated.
+      '404':
+        description: No unused forms found for the user
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  description: Indicates whether the operation was successful.
+                message:
+                  type: string
+                  description: Error message indicating no unused forms were found for the user.
+      '500':
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  description: Indicates whether the operation was successful.
+                error:
+                  type: string
+                  description: Error message indicating an internal server error occurred.
+/new/org-apply:
+  post:
+    summary: Submit organization application form
+    description: Submit an organization application form for land registration.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              organisationName:
+                type: string
+                description: Name of the organization.
+              location:
+                type: string
+                description: Location of the organization.
+              mailingAddress:
+                type: string
+                description: Mailing address of the organization.
+              contactNumber:
+                type: string
+                description: Contact number of the organization.
+              emailAddress:
+                type: string
+                format: email
+                description: Email address of the organization.
+              organizationLogo:
+                type: string
+                format: binary
+                description: Logo of the organization.
+              landLocality:
+                type: string
+                description: Locality of the land.
+              siteName:
+                type: string
+                description: Name of the site.
+              plotNumbers:
+                type: string
+                description: Plot numbers.
+              totalLandSize:
+                type: number
+                description: Total land size.
+              streetName:
+                type: string
+                description: Name of the street.
+              landTransferor:
+                type: string
+                description: Name of the land transferor.
+              dateOfOriginalTransfer:
+                type: string
+                format: date
+                description: Date of original land transfer.
+              purposeOfLand:
+                type: string
+                description: Purpose of the land.
+              contactOfTransferor:
+                type: string
+                description: Contact of the land transferor.
+              documents:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      description: Type of the document.
+                    image:
+                      type: string
+                      format: uri
+                      description: URL of the document image.
+                description: Array of documents uploaded.
+              payments:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    paymentType:
+                      type: string
+                      description: Type of payment.
+                    amount:
+                      type: number
+                      description: Amount of payment.
+                    paymentStatus:
+                      type: string
+                      description: Status of payment.
+                description: Array of payments made.
+    responses:
+      '201':
+        description: Organization form submitted successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: Success message indicating the form submission.
+                organizationForm:
+                  type: object
+                  description: Details of the submitted organization form.
+                  properties:
+                    uniqueFormID:
+                      type: string
+                      description: Unique ID of the organization form.
+                    organisationName:
+                      type: string
+                      description: Name of the organization.
+                    location:
+                      type: string
+                      description: Location of the organization.
+                    mailingAddress:
+                      type: string
+                      description: Mailing address of the organization.
+                    contactNumber:
+                      type: string
+                      description: Contact number of the organization.
+                    emailAddress:
+                      type: string
+                      format: email
+                      description: Email address of the organization.
+                    organizationLogo:
+                      type: string
+                      format: uri
+                      description: URL of the organization logo.
+                    landLocality:
+                      type: string
+                      description: Locality of the land.
+                    siteName:
+                      type: string
+                      description: Name of the site.
+                    plotNumbers:
+                      type: string
+                      description: Plot numbers.
+                    totalLandSize:
+                      type: number
+                      description: Total land size.
+                    streetName:
+                      type: string
+                      description: Name of the street.
+                    landTransferor:
+                      type: string
+                      description: Name of the land transferor.
+                    dateOfOriginalTransfer:
+                      type: string
+                      format: date
+                      description: Date of original land transfer.
+                    purposeOfLand:
+                      type: string
+                      description: Purpose of the land.
+                    contactOfTransferor:
+                      type: string
+                      description: Contact of the land transferor.
+                    documents:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            description: Type of the document.
+                          image:
+                            type: string
+                            format: uri
+                            description: URL of the document image.
+                      description: Array of documents uploaded.
+                    payments:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          paymentType:
+                            type: string
+                            description: Type of payment.
+                          amount:
+                            type: number
+                            description: Amount of payment.
+                          paymentStatus:
+                            type: string
+                            description: Status of payment.
+                      description: Array of payments made.
+      '401':
+        description: User not authenticated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: Error message indicating user is not authenticated.
+      '500':
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message indicating an internal server error occurred.
+/new/joint-apply:
+  post:
+    summary: Submit joint application form
+    description: Submit a joint application form for land registration.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              applicants:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    applicantName:
+                      type: string
+                      description: Name of the applicant.
+                    applicantDOB:
+                      type: string
+                      format: date
+                      description: Date of birth of the applicant.
+                    mailingAddress:
+                      type: string
+                      description: Mailing address of the applicant.
+                    contactNumber:
+                      type: string
+                      description: Contact number of the applicant.
+                    emailAddress:
+                      type: string
+                      format: email
+                      description: Email address of the applicant.
+                    placeOfResidence:
+                      type: string
+                      description: Place of residence of the applicant.
+                    hometown:
+                      type: string
+                      description: Hometown of the applicant.
+                    nextOfKin:
+                      type: string
+                      description: Next of kin of the applicant.
+                    maritalStatus:
+                      type: string
+                      description: Marital status of the applicant.
+                description: Array of applicant details.
+              landDetails:
+                type: object
+                properties:
+                  landLocality:
+                    type: string
+                    description: Locality of the land.
+                  siteName:
+                    type: string
+                    description: Name of the site.
+                  plotNumbers:
+                    type: string
+                    description: Plot numbers.
+                  totalLandSize:
+                    type: number
+                    description: Total land size.
+                  streetName:
+                    type: string
+                    description: Name of the street.
+                  landTransferor:
+                    type: string
+                    description: Name of the land transferor.
+                  dateOfOriginalTransfer:
+                    type: string
+                    format: date
+                    description: Date of original land transfer.
+                  purposeOfLand:
+                    type: string
+                    description: Purpose of the land.
+                  contactOfTransferor:
+                    type: string
+                    description: Contact of the land transferor.
+                description: Details of the land.
+              payments:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    paymentType:
+                      type: string
+                      description: Type of payment.
+                    amount:
+                      type: number
+                      description: Amount of payment.
+                    paymentStatus:
+                      type: string
+                      description: Status of payment.
+                description: Array of payments made.
+              documents:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      description: Type of the document.
+                    image:
+                      type: string
+                      format: uri
+                      description: URL of the document image.
+                description: Array of documents uploaded.
+    responses:
+      '201':
+        description: Application submitted successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: Success message indicating the form submission.
+                application:
+                  type: object
+                  description: Details of the submitted application form.
+                  properties:
+                    uniqueFormID:
+                      type: string
+                      description: Unique ID of the application form.
+                    applicantName:
+                      type: string
+                      description: Name of the applicants.
+                    applicantDOB:
+                      type: array
+                      items:
+                        type: string
+                      description: Dates of birth of the applicants.
+                    mailingAddress:
+                      type: string
+                      description: Mailing addresses of the applicants.
+                    contactNumber:
+                      type: string
+                      description: Contact numbers of the applicants.
+                    emailAddress:
+                      type: string
+                      format: email
+                      description: Email addresses of the applicants.
+                    placeOfResidence:
+                      type: string
+                      description: Places of residence of the applicants.
+                    hometown:
+                      type: string
+                      description: Hometowns of the applicants.
+                    nextOfKin:
+                      type: string
+                      description: Next of kins of the applicants.
+                    maritalStatus:
+                      type: string
+                      description: Marital statuses of the applicants.
+                    landLocality:
+                      type: string
+                      description: Locality of the land.
+                    siteName:
+                      type: string
+                      description: Name of the site.
+                    plotNumbers:
+                      type: string
+                      description: Plot numbers.
+                    totalLandSize:
+                      type: number
+                      description: Total land size.
+                    streetName:
+                      type: string
+                      description: Name of the street.
+                    landTransferor:
+                      type: string
+                      description: Name of the land transferor.
+                    dateOfOriginalTransfer:
+                      type: string
+                      format: date
+                      description: Date of original land transfer.
+                    purposeOfLand:
+                      type: string
+                      description: Purpose of the land.
+                    contactOfTransferor:
+                      type: string
+                      description: Contact of the land transferor.
+                    documents:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            description: Type of the document.
+                          image:
+                            type: string
+                            format: uri
+                            description: URL of the document image.
+                      description: Array of documents uploaded.
+                    payments:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          paymentType:
+                            type: string
+                            description: Type of payment.
+                          amount:
+                            type: number
+                            description: Amount of payment.
+                          paymentStatus:
+                            type: string
+                            description: Status of payment.
+                      description: Array of payments made.
+      '401':
+        description: User not authenticated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: Error message indicating user is not authenticated.
+      '500':
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message indicating an internal server error occurred.
+/new/report:
+  post:
+    summary: Create a new report
+    description: Create a new report for issues encountered.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+                format: email
+                description: Email address of the reporter.
+              issue:
+                type: string
+                description: Description of the issue.
+              priority:
+                type: string
+                description: Priority level of the issue.
+              description:
+                type: string
+                description: Detailed description of the issue.
+    responses:
+      '201':
+        description: Report created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: Success message indicating the report creation.
+                report:
+                  type: object
+                  description: Details of the created report.
+                  properties:
+                    id:
+                      type: integer
+                      description: Unique ID of the report.
+                    email:
+                      type: string
+                      format: email
+                      description: Email address of the reporter.
+                    issue:
+                      type: string
+                      description: Description of the issue.
+                    priority:
+                      type: string
+                      description: Priority level of the issue.
+                    description:
+                      type: string
+                      description: Detailed description of the issue.
+                    createdAt:
+                      type: string
+                      format: date-time
+                      description: Date and time when the report was created.
+      '400':
+        description: Bad request or validation error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: Error message indicating missing or invalid fields.
+      '500':
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message indicating an internal server error occurred.
+/pay/transactions:
+  post:
+    summary: Create a new transaction for payment
+    description: Create a new transaction for processing payments.
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              serviceId:
+                type: string
+                description: The ID of the payable service.
+              customerName:
+                type: string
+                description: Name of the customer making the payment.
+              phoneNumber:
+                type: string
+                description: Phone number of the customer.
+    responses:
+      '200':
+        description: Transaction created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                response_data:
+                  type: string
+                  description: Response data from the payment provider.
+      '400':
+        description: Bad request or validation error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message indicating missing or invalid fields or service not found.
+      '500':
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message indicating an internal server error occurred.

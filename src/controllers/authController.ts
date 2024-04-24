@@ -12,7 +12,6 @@ export const signup = async (req: Request, res: Response, next: NextFunction): P
   try {
     const { name, email, phoneNumber, occupation, newPassword, confirmPassword } = req.body;
 
-    // Check if the email is provided and is not empty
     if (email && email.trim() !== '') {
       const existingUserByEmail = await db.user.findFirst({
         where: {
@@ -61,41 +60,53 @@ export const signup = async (req: Request, res: Response, next: NextFunction): P
       }
     });
 
- 
-      await applicantNotice(name, email, phoneNumber);
+    await applicantNotice(name, email, phoneNumber);
     res.status(200).json({ message: 'Signup successful'});
 
   } catch (error) {
-    next(error);
+    let statusCode = 400;
+    if (error instanceof Error) {
+      if (error.message === 'Email is already registered' || error.message === 'Phone number is already registered') {
+        statusCode = 409; 
+      } else if (error.message === 'New password and confirm password do not match' || error.message === 'Password must be at least 8 characters long' || error.message === 'Password must contain at least 8 characters including letters, numbers, and special symbols') {
+        statusCode = 422;
+      }
+    }
+
+    res.status(statusCode).json({ error: error instanceof Error ? error.message : 'An error occurred' });
   }
 };
 
+
 export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    try {
+  try {
       const { emailOrPhone, password } = req.body;
       const user = await db.user.findFirst({
-        where: {
-          OR: [{ phoneNumber: emailOrPhone }, { email: emailOrPhone }]
-        }
+          where: {
+              OR: [{ phoneNumber: emailOrPhone }, { email: emailOrPhone }]
+          }
       });
 
       if (!user) {
-        throw new Error('Invalid email or password');
+          throw new Error('Invalid email or password');
       }
 
       const isPasswordValid: boolean = await compare(password, user.password);
 
       if (!isPasswordValid) {
-        throw new Error('Invalid email or password');
+          throw new Error('Invalid email or password');
       }
 
       const token: string = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET!, {
-        expiresIn: expiration
+          expiresIn: expiration
       });
-      res.json({ user: { ...user, password: undefined }, token,expiration});
-    } catch (error) {
-      next(error);
-    }
+      res.json({ user: { ...user, password: undefined }, token, expiration });
+  } catch (error) {
+      let statusCode = 401;
+      let errorMessage = 'Invalid email or password';
+
+      res.status(statusCode).json({ error: errorMessage });
+  }
 };
 
 
@@ -105,7 +116,7 @@ export const logout = async (req: Request, res: Response, next: NextFunction): P
       window.localStorage.removeItem('token');
       res.status(200).json({ message: 'Logged out successfully' });
     } else {
-      throw new Error('Local storage is not available in this environment');
+      res.status(400).json({ error: 'Local storage is not available in this environment' });
     }
   } catch (error) {
     next(error);

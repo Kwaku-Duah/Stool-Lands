@@ -36,7 +36,6 @@ const applicantMail_1 = require("../services/applicantMail");
 const signup = async (req, res, next) => {
     try {
         const { name, email, phoneNumber, occupation, newPassword, confirmPassword } = req.body;
-        // Check if the email is provided and is not empty
         if (email && email.trim() !== '') {
             const existingUserByEmail = await db_1.default.user.findFirst({
                 where: {
@@ -80,7 +79,16 @@ const signup = async (req, res, next) => {
         res.status(200).json({ message: 'Signup successful' });
     }
     catch (error) {
-        next(error);
+        let statusCode = 400;
+        if (error instanceof Error) {
+            if (error.message === 'Email is already registered' || error.message === 'Phone number is already registered') {
+                statusCode = 409;
+            }
+            else if (error.message === 'New password and confirm password do not match' || error.message === 'Password must be at least 8 characters long' || error.message === 'Password must contain at least 8 characters including letters, numbers, and special symbols') {
+                statusCode = 422;
+            }
+        }
+        res.status(statusCode).json({ error: error instanceof Error ? error.message : 'An error occurred' });
     }
 };
 exports.signup = signup;
@@ -105,7 +113,9 @@ const login = async (req, res, next) => {
         res.json({ user: { ...user, password: undefined }, token, expiration: secrets_1.expiration });
     }
     catch (error) {
-        next(error);
+        let statusCode = 401;
+        let errorMessage = 'Invalid email or password';
+        res.status(statusCode).json({ error: errorMessage });
     }
 };
 exports.login = login;
@@ -116,7 +126,7 @@ const logout = async (req, res, next) => {
             res.status(200).json({ message: 'Logged out successfully' });
         }
         else {
-            throw new Error('Local storage is not available in this environment');
+            res.status(400).json({ error: 'Local storage is not available in this environment' });
         }
     }
     catch (error) {

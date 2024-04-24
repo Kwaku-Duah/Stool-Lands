@@ -135,12 +135,13 @@ export const verifyOTPController = async (req: Request, res: Response, next: Nex
 
 export const resendOTPController = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-      const { requestId } = req.body;
-      const otpResponse = await resendOTP(requestId);
+    const { requestId } = req.body;
+    const otpResponse = await resendOTP(requestId);
 
-      res.json(otpResponse);
+    res.json(otpResponse);
   } catch (error) {
-      next(error);
+    res.status(500).json({ message: 'An unexpected error occurred while processing your request.' });
+    next(error);
   }
 };
 
