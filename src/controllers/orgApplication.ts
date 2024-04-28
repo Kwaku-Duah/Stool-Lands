@@ -93,11 +93,13 @@ export const createOrganizationForm = async (req: Request, res: Response) => {
         dateOfOriginalTransfer,
         purposeOfLand,
         contactOfTransferor,
+        type:"org",
         documents: {
           createMany: {
             data: uploadedDocumentUrls
           }
         },
+        formStatus: 'FILLED',
         status: 'PENDING',
         User: { connect: { id: userId } }
       }

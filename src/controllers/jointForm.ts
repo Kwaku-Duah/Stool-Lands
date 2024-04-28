@@ -2,6 +2,7 @@ import { Request as ExpressRequest, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import db from '../dbConfig/db'
+import { generateUniqueFormID } from '../utils/unique';
 import { config } from 'dotenv';
 
 config();
@@ -64,7 +65,7 @@ export const jointApplicationForm = async (req: Request, res: Response) => {
       };
     }));
 
-    const uniqueFormID = uuidv4();
+    const uniqueFormID = generateUniqueFormID();
 
     const applicantNames = applicants.map(applicant => applicant.applicantName);
     const applicantDOBs = applicants.map(applicant => applicant.applicantDOB);
@@ -82,11 +83,13 @@ export const jointApplicationForm = async (req: Request, res: Response) => {
         nextOfKin: applicants.map(applicant => applicant.nextOfKin).join(' & '),
         maritalStatus: applicants.map(applicant => applicant.maritalStatus).join(' & '), 
         ...landDetails,
+        type:"joint",
         documents: {
           createMany: {
             data: uploadedDocumentUrls
           }
         },
+        formStatus: 'FILLED',
         status: 'PENDING',
         User: { connect: { id: userId } }
       },
@@ -94,6 +97,7 @@ export const jointApplicationForm = async (req: Request, res: Response) => {
         documents: true
     }
     });
+    
 
     res.status(201).json({ message: 'Application submitted successfully', application });
   } catch (error: any) {

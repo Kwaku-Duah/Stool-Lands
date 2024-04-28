@@ -97,12 +97,13 @@ model Application {
   dateOfOriginalTransfer DateTime
   purposeOfLand          String
   contactOfTransferor    String?
+  type                   String?
   documents              Document[]
   status                 ApplicationStatus
   createdAt              DateTime          @default(now())
   User                   User              @relation(fields: [userId], references: [id])
   userId                 Int
-  formStatus             FormStatus        @default(INACTIVE)
+  formStatus             FormState        @default(NEW)
 }
 
 model OrganizationForm {
@@ -123,12 +124,13 @@ model OrganizationForm {
   dateOfOriginalTransfer DateTime
   purposeOfLand          String
   contactOfTransferor    String?
+  type                   String?
   documents              orgDocument[]
   status                 ApplicationStatus
   createdAt              DateTime          @default(now())
   User                   User              @relation(fields: [userId], references: [id])
   userId                 Int
-  formStatus             FormStatus        @default(INACTIVE)
+  formStatus             FormState       @default(NEW)
 }
 
 model Document {
@@ -171,6 +173,12 @@ enum PaymentStatus {
   COMPLETED
   FAILED
 }
+
+enum FormState {
+  NEW
+  FILLED
+}
+
 
 enum FormStatus {
   USED

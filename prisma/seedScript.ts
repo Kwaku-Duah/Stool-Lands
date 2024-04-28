@@ -26,6 +26,7 @@ export async function seedScript() {
     logMessage('Existing user with email deleted.');
   }
 
+  
 
   const existingUserByPhoneNumber = await db.user.findFirst({
     where: {
