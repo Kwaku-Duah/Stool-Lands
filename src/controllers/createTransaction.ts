@@ -106,7 +106,3 @@ export const createTransaction = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
-// Provider description from the webhook
-// Provider to the transaction table
-// Expired to the transaction-
