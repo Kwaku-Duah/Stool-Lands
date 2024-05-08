@@ -1,11 +1,9 @@
 import { Request as ExpressRequest, Response } from 'express';
 import fetch from 'node-fetch';
-import { PrismaClient } from '@prisma/client';
 import { USERNAME_KEY, PASSWORD_KEY } from '../secrets';
 import db from '../dbConfig/db'
 import { generateUniqueFormID } from '../utils/unique';
 
-const prisma = new PrismaClient();
 
 function generateClientReference() {
   const timestamp = Date.now().toString();
@@ -28,7 +26,7 @@ export const createTransaction = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
  
-    const service = await prisma.payableService.findUnique({
+    const service = await db.payableService.findUnique({
       where: { code: serviceId }
     });
 
@@ -42,7 +40,7 @@ export const createTransaction = async (req: Request, res: Response) => {
 
       const clientReference = generateClientReference();
 
-      await prisma.stateForm.create({
+      await db.stateForm.create({
         data: {
           token: formToken,
           status: 'INACTIVE',
@@ -51,7 +49,7 @@ export const createTransaction = async (req: Request, res: Response) => {
         }
       });
 
-      await prisma.transaction.create({
+      await db.transaction.create({
         data: {
           status: 'PENDING',
           clientReference,
@@ -89,7 +87,7 @@ export const createTransaction = async (req: Request, res: Response) => {
 
           // callbackUrl: 'https://webhook.site/9c84d2a4-868d-43b8-a185-ed1d3f2ad904',
           callbackUrl: 'https://stoollands-duqb29qb.b4a.run/transaction/callback',
-          returnUrl: 'http://localhost:5000/hello',
+          returnUrl: 'https://xorvey-git-main-gloriatampuris-projects-0969866d.vercel.app',
           cancellationUrl: 'http://localhost:5000/payments/callback',
           merchantAccountNumber: '11684',
           clientReference,
