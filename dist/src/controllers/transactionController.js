@@ -10,38 +10,36 @@ const secrets_1 = require("../secrets");
 const prisma = new client_1.PrismaClient();
 const handlePaymentCallback = async (req, res) => {
     try {
-        const { ResponseCode, Status, Data } = req.body;
+        const { Status, Data } = req.body;
         console.log(req.body);
         const { ClientReference, PaymentDetails, Description } = Data;
-        console.log(Data);
-        console.log(PaymentDetails.MobileMoneyNumber);
         if (ClientReference) {
+            const updateData = {};
             if (Status === 'Success') {
-                await prisma.transaction.update({
-                    where: { clientReference: ClientReference },
-                    data: {
-                        status: 'COMPLETED',
-                        isPaymentCompleted: true,
-                        isServiceCompleted: true,
-                        MobileMoneyNumber: PaymentDetails?.MobileMoneyNumber,
-                        PaymentType: PaymentDetails?.PaymentType,
-                        Channel: PaymentDetails?.Channel,
-                        ProviderDescription: Description
-                    }
-                });
+                updateData.status = 'COMPLETED';
+                updateData.isPaymentCompleted = true;
+                updateData.isServiceCompleted = true;
             }
             else if (Status === 'Failed') {
-                await prisma.transaction.update({
-                    where: { clientReference: ClientReference },
-                    data: { status: 'FAILED' }
-                });
+                updateData.status = 'FAILED';
             }
+            if (PaymentDetails) {
+                updateData.MobileMoneyNumber = PaymentDetails.MobileMoneyNumber || null;
+                updateData.PaymentType = PaymentDetails.PaymentType || null;
+                updateData.Channel = PaymentDetails.Channel || null;
+            }
+            updateData.ProviderDescription = Description;
+            await prisma.transaction.update({
+                where: { clientReference: ClientReference },
+                data: updateData
+            });
             await prisma.stateForm.update({
                 where: { clientReference: ClientReference },
                 data: { status: Status === 'Success' ? 'UNUSED' : 'EXPIRED' }
             });
         }
-        res.status(200).json({ success: "true", message: 'Payment callback received successfully' });
+        const successMessage = Status === 'Success' ? 'Payment callback received successfully' : 'Payment callback failed';
+        res.status(200).json({ success: Status === 'Success', message: successMessage });
     }
     catch (error) {
         console.error('Error handling payment callback:', error);

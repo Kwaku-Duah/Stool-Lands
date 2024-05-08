@@ -9,7 +9,7 @@ const handlebars_1 = __importDefault(require("handlebars"));
 const secrets_1 = require("../secrets");
 const mailer_1 = require("../utils/mailer");
 const applicantSMS_1 = require("./applicantSMS");
-const backroomMessage = async (name, email, phoneNumber, password, occupation) => {
+const backroomMessage = async (name, email, phoneNumber, password, occupation, link) => {
     try {
         const location = await fs_1.promises.readFile('src/templates/backroomMessage.html', 'utf-8');
         const template = handlebars_1.default.compile(location);
@@ -19,7 +19,7 @@ const backroomMessage = async (name, email, phoneNumber, password, occupation) =
             phoneNumber: phoneNumber,
             password: password,
             occupation: occupation,
-            frontURL: secrets_1.FRONTEND_ORIGIN
+            frontURL: link
         };
         console.log(placeHolders);
         const htmlMessage = template(placeHolders);

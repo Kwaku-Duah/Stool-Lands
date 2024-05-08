@@ -38,7 +38,15 @@ const createChief = async (req, res) => {
                 chiefId,
             },
         });
-        await (0, backRoom_1.backroomMessage)(name, email, phoneNumber, newPassword, occupation);
+        const user = await prisma.user.findFirst({
+            where: {
+                email: email
+            }
+        });
+        const frontendURL = process.env.FRONTEND_ORIGIN || '';
+        const link = `${frontendURL}/resetPswd/${user?.id}`;
+        console.log(link);
+        await (0, backRoom_1.backroomMessage)(name, email, phoneNumber, newPassword, occupation, link);
         res.status(201).json({ message: 'Chief created successfully', chief: newChief });
     }
     catch (error) {

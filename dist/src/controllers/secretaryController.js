@@ -38,7 +38,15 @@ const createSecretary = async (req, res) => {
                 secretaryId,
             },
         });
-        await (0, backRoom_1.backroomMessage)(name, email, phoneNumber, newPassword, occupation);
+        const user = await prisma.user.findFirst({
+            where: {
+                email: email
+            }
+        });
+        const frontendURL = process.env.FRONTEND_ORIGIN || '';
+        const link = `${frontendURL}/resetPswd/${user?.id}`;
+        console.log("frontend URL", link);
+        await (0, backRoom_1.backroomMessage)(name, email, phoneNumber, newPassword, occupation, link);
         res.status(201).json({ message: 'Secretary created successfully', secretary: newSecretary });
     }
     catch (error) {

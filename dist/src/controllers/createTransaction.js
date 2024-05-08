@@ -49,7 +49,11 @@ const createTransaction = async (req, res) => {
                     paymentProvider: 'Hubtel',
                     isPaymentCompleted: false,
                     isServiceCompleted: false,
-                    amount: service.amount
+                    amount: service.amount,
+                    MobileMoneyNumber: null,
+                    PaymentType: null,
+                    Channel: null,
+                    ProviderDescription: 'Payment details not available yet'
                 }
             });
             const authString = Buffer.from(secrets_1.USERNAME_KEY + ':' + secrets_1.PASSWORD_KEY).toString('base64');

@@ -1,12 +1,15 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.jointApplicationForm = void 0;
-const client_1 = require("@prisma/client");
 const uuid_1 = require("uuid");
 const client_s3_1 = require("@aws-sdk/client-s3");
+const db_1 = __importDefault(require("../dbConfig/db"));
+const unique_1 = require("../utils/unique");
 const dotenv_1 = require("dotenv");
 (0, dotenv_1.config)();
-const prisma = new client_1.PrismaClient();
 const s3Client = new client_s3_1.S3Client({
     region: process.env.AWS_REGION,
     credentials: {
@@ -28,16 +31,8 @@ const jointApplicationForm = async (req, res) => {
         if (!landDetails || typeof landDetails !== 'object') {
             throw new Error('Land details should be provided as an object');
         }
-        if (!Array.isArray(payments)) {
-            throw new Error('Payments should be an array');
-        }
         if (!Array.isArray(documents)) {
             throw new Error('Documents should be an array');
-        }
-        for (const payment of payments) {
-            if (typeof payment.paymentType !== 'string' || isNaN(payment.amount) || typeof payment.paymentStatus !== 'string') {
-                throw new Error('Invalid payment data');
-            }
         }
         const uploadedDocumentUrls = await Promise.all(documents.map(async (document) => {
             const key = `organization/${userId}/${(0, uuid_1.v4)()}-${document.image.split('/').pop()}`;
@@ -54,40 +49,34 @@ const jointApplicationForm = async (req, res) => {
                 image: `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${key}`
             };
         }));
-        const uniqueFormID = (0, uuid_1.v4)();
-        // Extract applicant details
+        const uniqueFormID = (0, unique_1.generateUniqueFormID)();
         const applicantNames = applicants.map(applicant => applicant.applicantName);
         const applicantDOBs = applicants.map(applicant => applicant.applicantDOB);
-        // Create the application entry in the database
-        const application = await prisma.application.create({
+        const application = await db_1.default.application.create({
             data: {
                 uniqueFormID,
                 applicantName: applicantNames.join(' & '),
-                applicantDOB: applicantDOBs, // Store DOBs as an array
+                applicantDOB: applicantDOBs,
                 mailingAddress: applicants.map(applicant => applicant.mailingAddress).join(' & '),
                 contactNumber: applicants.map(applicant => applicant.contactNumber).join(' & '),
                 emailAddress: applicants.map(applicant => applicant.emailAddress).join(' & '),
                 placeOfResidence: applicants.map(applicant => applicant.placeOfResidence).join(' & '),
                 hometown: applicants.map(applicant => applicant.hometown).join(' & '),
                 nextOfKin: applicants.map(applicant => applicant.nextOfKin).join(' & '),
-                maritalStatus: applicants.map(applicant => applicant.maritalStatus).join(' & '), // Add marital status
+                maritalStatus: applicants.map(applicant => applicant.maritalStatus).join(' & '),
                 ...landDetails,
+                type: "joint",
                 documents: {
                     createMany: {
                         data: uploadedDocumentUrls
                     }
                 },
-                payments: {
-                    createMany: {
-                        data: payments
-                    }
-                },
+                formStatus: 'FILLED',
                 status: 'PENDING',
                 User: { connect: { id: userId } }
             },
             include: {
-                documents: true,
-                payments: true
+                documents: true
             }
         });
         res.status(201).json({ message: 'Application submitted successfully', application });

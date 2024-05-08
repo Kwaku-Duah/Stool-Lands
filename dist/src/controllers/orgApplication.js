@@ -1,13 +1,15 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createOrganizationForm = void 0;
-const client_1 = require("@prisma/client");
 const uuid_1 = require("uuid");
 const client_s3_1 = require("@aws-sdk/client-s3");
 const dotenv_1 = require("dotenv");
 const unique_1 = require("../utils/unique");
+const db_1 = __importDefault(require("../dbConfig/db"));
 (0, dotenv_1.config)();
-const prisma = new client_1.PrismaClient();
 const s3Client = new client_s3_1.S3Client({
     region: process.env.AWS_REGION,
     credentials: {
@@ -22,17 +24,9 @@ const createOrganizationForm = async (req, res) => {
         if (!userId) {
             return res.status(401).json({ message: 'User not authenticated' });
         }
-        const { organisationName, location, mailingAddress, contactNumber, emailAddress, organizationLogo, landLocality, siteName, plotNumbers, totalLandSize, streetName, landTransferor, dateOfOriginalTransfer, purposeOfLand, contactOfTransferor, payments, documents } = req.body;
+        const { organisationName, location, mailingAddress, contactNumber, emailAddress, organizationLogo, landLocality, siteName, plotNumbers, totalLandSize, streetName, landTransferor, dateOfOriginalTransfer, purposeOfLand, contactOfTransferor, documents } = req.body;
         if (!Array.isArray(documents)) {
             throw new Error('Documents should be an array');
-        }
-        if (!Array.isArray(payments)) {
-            throw new Error('Payments should be an array');
-        }
-        for (const payment of payments) {
-            if (typeof payment.paymentType !== 'string' || isNaN(payment.amount) || typeof payment.paymentStatus !== 'string') {
-                throw new Error('Invalid payment data');
-            }
         }
         const uniqueFormID = (0, unique_1.generateUniqueFormID)();
         const uploadedDocumentUrls = await Promise.all(documents.map(async (document) => {
@@ -58,7 +52,7 @@ const createOrganizationForm = async (req, res) => {
         };
         await s3Client.send(new client_s3_1.PutObjectCommand(logoParams));
         const uploadedLogoUrl = `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${logoKey}`;
-        const organizationForm = await prisma.organizationForm.create({
+        const organizationForm = await db_1.default.organizationForm.create({
             data: {
                 uniqueFormID,
                 organisationName,
@@ -76,16 +70,13 @@ const createOrganizationForm = async (req, res) => {
                 dateOfOriginalTransfer,
                 purposeOfLand,
                 contactOfTransferor,
-                payments: {
-                    createMany: {
-                        data: payments
-                    }
-                },
+                type: "org",
                 documents: {
                     createMany: {
                         data: uploadedDocumentUrls
                     }
                 },
+                formStatus: 'FILLED',
                 status: 'PENDING',
                 User: { connect: { id: userId } }
             }
@@ -98,3 +89,4 @@ const createOrganizationForm = async (req, res) => {
     }
 };
 exports.createOrganizationForm = createOrganizationForm;
+// Updated the database

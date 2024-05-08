@@ -111,3 +111,5 @@ export const createOrganizationForm = async (req: Request, res: Response) => {
     res.status(500).json({ error: error.message || 'An error occurred while processing your request' });
   }
 };
+
+// Updated the database

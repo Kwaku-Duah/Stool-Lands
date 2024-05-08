@@ -1,13 +1,15 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createReport = exports.getFormsCreatedByUser = exports.fillApplicationForm = void 0;
-const client_1 = require("@prisma/client");
 const uuid_1 = require("uuid");
 const client_s3_1 = require("@aws-sdk/client-s3");
 const dotenv_1 = require("dotenv");
 const unique_1 = require("../utils/unique");
+const db_1 = __importDefault(require("../dbConfig/db"));
 (0, dotenv_1.config)();
-const prisma = new client_1.PrismaClient();
 const s3Client = new client_s3_1.S3Client({
     region: process.env.AWS_REGION,
     credentials: {
@@ -22,19 +24,11 @@ const fillApplicationForm = async (req, res) => {
         if (!userId) {
             return res.status(401).json({ message: 'User not authenticated' });
         }
-        const { applicantName, applicantDOB, mailingAddress, contactNumber, emailAddress, placeOfResidence, hometown, maritalStatus, nextOfKin, landLocality, siteName, plotNumbers, totalLandSize, streetName, landTransferor, dateOfOriginalTransfer, purposeOfLand, contactOfTransferor, documents, payments } = req.body;
+        const { applicantName, applicantDOB, mailingAddress, contactNumber, emailAddress, placeOfResidence, hometown, maritalStatus, nextOfKin, landLocality, siteName, plotNumbers, totalLandSize, streetName, landTransferor, dateOfOriginalTransfer, purposeOfLand, contactOfTransferor, documents } = req.body;
         if (!Array.isArray(documents)) {
             throw new Error('Documents should be an array');
         }
-        if (!Array.isArray(payments)) {
-            throw new Error('Payments should be an array');
-        }
-        for (const payment of payments) {
-            if (typeof payment.paymentType !== 'string' || isNaN(payment.amount) || typeof payment.paymentStatus !== 'string') {
-                throw new Error('Invalid payment data');
-            }
-        }
-        const existingUser = await prisma.user.findUnique({
+        const existingUser = await db_1.default.user.findUnique({
             where: { id: userId }
         });
         if (!existingUser) {
@@ -58,7 +52,7 @@ const fillApplicationForm = async (req, res) => {
                 image: `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${key}`
             };
         }));
-        const application = await prisma.application.create({
+        const application = await db_1.default.application.create({
             data: {
                 uniqueFormID,
                 applicantName,
@@ -79,22 +73,18 @@ const fillApplicationForm = async (req, res) => {
                 dateOfOriginalTransfer,
                 purposeOfLand,
                 contactOfTransferor,
+                type: "individual",
                 documents: {
                     createMany: {
                         data: uploadedDocumentUrls
                     }
                 },
-                payments: {
-                    createMany: {
-                        data: payments
-                    }
-                },
+                formStatus: 'FILLED',
                 status: 'PENDING',
                 User: { connect: { id: userId } }
             },
             include: {
-                documents: true,
-                payments: true
+                documents: true
             }
         });
         res.status(201).json({ message: 'Application submitted successfully', application });
@@ -105,33 +95,49 @@ const fillApplicationForm = async (req, res) => {
     }
 };
 exports.fillApplicationForm = fillApplicationForm;
+// shows if user has existing forms and if yes,displays the filled form
 const getFormsCreatedByUser = async (req, res) => {
     try {
         const userId = req.user?.id;
-        console.log("Display this, like it is hitting the endpoint", userId);
         if (!userId) {
             return res.status(401).json({ success: false, message: 'User not authenticated' });
         }
-        const stateForm = await prisma.stateForm.findFirst({
+        const stateForm = await db_1.default.stateForm.findFirst({
             where: {
                 userId: userId,
                 status: 'UNUSED'
             }
         });
-        console.log(stateForm);
         if (!stateForm) {
             return res.status(404).json({ success: false, message: 'No unused forms found for the user' });
         }
-        const forms = await prisma.application.findMany({
+        const applicationForms = await db_1.default.application.findMany({
             where: {
                 userId: userId
             },
             include: {
-                documents: true,
-                payments: true
+                documents: true
             }
         });
-        res.status(200).json({ success: true, forms });
+        const organizationForms = await db_1.default.organizationForm.findMany({
+            where: {
+                userId: userId
+            },
+            include: {
+                documents: true
+            }
+        });
+        const forms = [...applicationForms, ...organizationForms];
+        console.log(forms);
+        const formsWithTypes = forms.map(form => {
+            if (form.formStatus === 'FILLED') {
+                return form;
+            }
+            else {
+                return { id: form.id, type: form.type, formStatus: form.formStatus };
+            }
+        });
+        res.status(200).json({ success: true, forms: formsWithTypes });
     }
     catch (error) {
         console.error('Error occurred while fetching forms:', error);
@@ -145,7 +151,7 @@ const createReport = async (req, res) => {
         if (!email || !issue || !priority || !description) {
             return res.status(400).json({ message: 'All fields are required' });
         }
-        const report = await prisma.report.create({
+        const report = await db_1.default.report.create({
             data: {
                 email,
                 issue,
