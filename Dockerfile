@@ -19,6 +19,11 @@ COPY . .
 # Expose the port your app runs on
 EXPOSE 5000
 
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD curl -f https://stoollands-cs7f40ga.b4a.run/ || exit 1
+
+
 # Command to run your application
 CMD ["yarn", "start"]
 
