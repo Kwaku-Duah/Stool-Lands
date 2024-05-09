@@ -111,6 +111,15 @@ const getFormsCreatedByUser = async (req, res) => {
         if (!stateForm) {
             return res.status(404).json({ success: false, message: 'No unused forms found for the user' });
         }
+        const transaction = await db_1.default.transaction.findFirst({
+            where: {
+                userId: userId
+            },
+            select: {
+                serviceId: true
+            }
+        });
+        const serviceId = transaction?.serviceId;
         const applicationForms = await db_1.default.application.findMany({
             where: {
                 userId: userId
@@ -128,7 +137,6 @@ const getFormsCreatedByUser = async (req, res) => {
             }
         });
         const forms = [...applicationForms, ...organizationForms];
-        console.log(forms);
         const formsWithTypes = forms.map(form => {
             if (form.formStatus === 'FILLED') {
                 return form;
@@ -137,7 +145,7 @@ const getFormsCreatedByUser = async (req, res) => {
                 return { id: form.id, type: form.type, formStatus: form.formStatus };
             }
         });
-        res.status(200).json({ success: true, forms: formsWithTypes });
+        res.status(200).json({ success: true, forms: formsWithTypes, serviceId: serviceId });
     }
     catch (error) {
         console.error('Error occurred while fetching forms:', error);

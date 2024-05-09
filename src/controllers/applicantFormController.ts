@@ -152,6 +152,7 @@ export const getFormsCreatedByUser = async (req: Request, res: Response) => {
     });
 
     const serviceId = transaction?.serviceId;
+
     const applicationForms = await db.application.findMany({
       where: {
           userId: userId
@@ -171,7 +172,7 @@ export const getFormsCreatedByUser = async (req: Request, res: Response) => {
   });
 
   const forms = [...applicationForms, ...organizationForms];
-  console.log(forms)
+
 
   const formsWithTypes = forms.map(form => {
       if (form.formStatus === 'FILLED') {

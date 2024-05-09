@@ -7,6 +7,6 @@ const callbackRoute: Router = express.Router();
 
 // Route for handling payment callbacks
 callbackRoute.post('/callback', handlePaymentCallback);
-callbackRoute.get('/state',checkTransactionStatus)
+callbackRoute.post('/state',checkTransactionStatus)
 
 export default callbackRoute;

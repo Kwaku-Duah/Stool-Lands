@@ -5,10 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createTransaction = void 0;
 const node_fetch_1 = __importDefault(require("node-fetch"));
-const client_1 = require("@prisma/client");
 const secrets_1 = require("../secrets");
+const db_1 = __importDefault(require("../dbConfig/db"));
 const unique_1 = require("../utils/unique");
-const prisma = new client_1.PrismaClient();
 function generateClientReference() {
     const timestamp = Date.now().toString();
     const random = Math.floor(Math.random() * 1000).toString();
@@ -18,8 +17,7 @@ const createTransaction = async (req, res) => {
     const { serviceId, customerName, phoneNumber } = req.body;
     try {
         const userId = req.user?.id;
-        console.log("This is the userid", userId);
-        const service = await prisma.payableService.findUnique({
+        const service = await db_1.default.payableService.findUnique({
             where: { code: serviceId }
         });
         if (!service) {
@@ -28,7 +26,7 @@ const createTransaction = async (req, res) => {
         if (service.tags.includes('form')) {
             const formToken = (0, unique_1.generateUniqueFormID)();
             const clientReference = generateClientReference();
-            await prisma.stateForm.create({
+            await db_1.default.stateForm.create({
                 data: {
                     token: formToken,
                     status: 'INACTIVE',
@@ -36,7 +34,7 @@ const createTransaction = async (req, res) => {
                     clientReference: clientReference
                 }
             });
-            await prisma.transaction.create({
+            await db_1.default.transaction.create({
                 data: {
                     status: 'PENDING',
                     clientReference,
@@ -57,6 +55,7 @@ const createTransaction = async (req, res) => {
                 }
             });
             const authString = Buffer.from(secrets_1.USERNAME_KEY + ':' + secrets_1.PASSWORD_KEY).toString('base64');
+            console.log(authString);
             const url = 'https://payproxyapi.hubtel.com/items/initiate';
             const options = {
                 method: 'POST',
@@ -68,8 +67,9 @@ const createTransaction = async (req, res) => {
                 body: JSON.stringify({
                     totalAmount: service.amount,
                     description: service.description,
-                    callbackUrl: 'https://webhook.site/9c84d2a4-868d-43b8-a185-ed1d3f2ad904',
-                    returnUrl: 'http://localhost:5000/hello',
+                    // callbackUrl: 'https://webhook.site/9c84d2a4-868d-43b8-a185-ed1d3f2ad904',
+                    callbackUrl: 'https://stoollands-duqb29qb.b4a.run/transaction/callback',
+                    returnUrl: 'https://xorvey-git-main-gloriatampuris-projects-0969866d.vercel.app',
                     cancellationUrl: 'http://localhost:5000/payments/callback',
                     merchantAccountNumber: '11684',
                     clientReference,
@@ -89,6 +89,3 @@ const createTransaction = async (req, res) => {
     }
 };
 exports.createTransaction = createTransaction;
-// Provider description from the webhook
-// Provider to the transaction table
-// Expired to the transaction-

@@ -8,5 +8,5 @@ const transactionController_1 = require("../controllers/transactionController");
 const callbackRoute = express_1.default.Router();
 // Route for handling payment callbacks
 callbackRoute.post('/callback', transactionController_1.handlePaymentCallback);
-callbackRoute.get('/state', transactionController_1.checkTransactionStatus);
+callbackRoute.post('/state', transactionController_1.checkTransactionStatus);
 exports.default = callbackRoute;

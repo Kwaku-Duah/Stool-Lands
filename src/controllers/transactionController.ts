@@ -79,7 +79,7 @@ export const checkUnusedFormForUser = async (req: Request, res: Response) => {
     if (stateForm) {
       return res.status(200).json({ success: true, message: 'Unused form exists for user' });
     } else {
-      return res.status(200).json({ success: false, message: 'No unused form exists for user' });
+      return res.status(404).json({ success: false, message: 'No unused form exists for user' });
     }
   } catch (error) {
     console.error('Error checking unused form for user:', error);
@@ -98,7 +98,6 @@ export async function checkTransactionStatus(req: Request, res: Response) {
 
     const authString = Buffer.from(USERNAME_KEY + ':' + PASSWORD_KEY).toString('base64');
 
-    console.log(authString)
 
     const transaction = await prisma.transaction.findFirst({
       where: { clientReference }
@@ -106,7 +105,7 @@ export async function checkTransactionStatus(req: Request, res: Response) {
 
     if (!transaction) return res.status(404).json({ success: false, message: "Failed to find transaction" });
 
-    if (transaction.status === 'COMPLETED') return res.json({ success: true });
+    if (transaction.status === 'COMPLETED') return res.json({ success: true, message: "Successful transaction" });
 
     if (transaction.status === 'PENDING') {
       const url = `https://api-txnstatus.hubtel.com/transactions/11684/status?clientReference=${clientReference}`;

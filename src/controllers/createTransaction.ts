@@ -72,6 +72,7 @@ export const createTransaction = async (req: Request, res: Response) => {
 
 
       const authString = Buffer.from(USERNAME_KEY + ':' + PASSWORD_KEY).toString('base64');
+      console.log(authString)
 
       const url = 'https://payproxyapi.hubtel.com/items/initiate';
       const options = {
