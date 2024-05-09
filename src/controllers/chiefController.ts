@@ -1,14 +1,13 @@
 import { Request, Response } from 'express';
 import { hashSync } from 'bcrypt';
-import { PrismaClient, ROLE } from '@prisma/client';
+import {  ROLE } from '@prisma/client';
 import { backroomMessage } from '../services/backRoom';
-import { password } from '../secrets';
+import db from '../dbConfig/db'
 
 
-const prisma = new PrismaClient();
 
 const generateChiefId = async (): Promise<string> => {
-  const existingChiefCount = await prisma.chief.count();
+  const existingChiefCount = await db.chief.count();
   const chiefCount = existingChiefCount + 1;
   const chiefId = `CHIEF-${chiefCount.toString().padStart(3, '0')}`;
   return chiefId;
@@ -28,7 +27,7 @@ export const createChief = async (req: Request, res: Response) => {
 
     const hashedPassword = hashSync(newPassword, 10);
 
-    const newUser = await prisma.user.create({
+    const newUser = await db.user.create({
       data: {
         name,
         email,
@@ -41,14 +40,14 @@ export const createChief = async (req: Request, res: Response) => {
 
     const chiefId = await generateChiefId();
 
-    const newChief = await prisma.chief.create({
+    const newChief = await db.chief.create({
       data: {
         email: newUser.email!,
         chiefId,
       },
     });
 
-    const user = await prisma.user.findFirst({
+    const user = await db.user.findFirst({
       where: {
         email: email
       }
