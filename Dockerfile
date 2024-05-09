@@ -5,7 +5,7 @@ FROM node:18-bullseye
 WORKDIR /app
 
 # Copy package.json and yarn.lock to the working directory
-COPY package.json ./
+COPY package.json yarn.lock ./
 
 COPY prisma/ ./prisma
 # Install dependencies
