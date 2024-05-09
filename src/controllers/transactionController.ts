@@ -106,7 +106,7 @@ export async function checkTransactionStatus(req: Request, res: Response) {
     if (!transaction) return res.status(404).json({ success: false, message: "Failed to find transaction" });
 
     if (transaction.status === 'COMPLETED') return res.json({ success: true, message: "Successful transaction" });
-
+    // Using Hubtel's API to check...
     if (transaction.status === 'PENDING') {
       const url = `https://api-txnstatus.hubtel.com/transactions/11684/status?clientReference=${clientReference}`;
       const transactionStatusResponse = await axios.get(url, {
