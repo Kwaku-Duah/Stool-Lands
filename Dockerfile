@@ -9,7 +9,7 @@ COPY package.json yarn.lock ./
 
 COPY prisma/ ./prisma
 # Install dependencies
-RUN yarn install
+RUN yarn
 RUN yarn prisma:generate
 
 
@@ -17,7 +17,7 @@ RUN yarn prisma:generate
 COPY . .
 
 # Expose the port your app runs on
-EXPOSE 5000
+EXPOSE 5001
 
 
 # Command to run your application
