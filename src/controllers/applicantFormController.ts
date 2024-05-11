@@ -2,7 +2,6 @@ import { Request as ExpressRequest, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { config } from 'dotenv';
-import { generateUniqueFormID } from '../utils/unique';
 import db from '../dbConfig/db';
 
 config();
@@ -56,14 +55,12 @@ export const fillApplicationForm = async (req: Request, res: Response) => {
       throw new Error(`User with ID ${userId} does not exist`);
     }
 
-    const uniqueFormID = generateUniqueFormID();
-    console.log(uniqueFormID)
+    // const uniqueFormID = generateUniqueFormID();
 
     const uploadedDocumentUrls = await Promise.all(documents.map(async (document: any) => {
       const key = `${userId}/${uuidv4()}-${document.image.split('/').pop()}`;
       ;
 
-      console.log(key)
       const params = {
         Bucket: process.env.BUCKET_NAME,
         Key: key,
@@ -78,6 +75,23 @@ export const fillApplicationForm = async (req: Request, res: Response) => {
         image: `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${key}`
       };
     }));
+
+
+    const stateForm = await db.stateForm.findFirst({
+      where: {
+        userId: userId,
+        status: 'UNUSED'
+      }
+    });
+
+
+    if (!stateForm) {
+      return res.status(404).json({ message: 'No unused stateForm found for the user' });
+    }
+
+    const uniqueFormID = stateForm.token;
+
+    console.log(uniqueFormID)
 
     const application = await db.application.create({
       data: {
@@ -115,12 +129,25 @@ export const fillApplicationForm = async (req: Request, res: Response) => {
       }
     });
 
+    await db.stateForm.update({
+      where: {
+        id: stateForm.id
+      },
+      data: {
+        status: 'USED'
+      }
+    });
+
     res.status(201).json({ message: 'Application submitted successfully', application });
   } catch (error: any) {
     console.error('Error occurred in fillApplicationForm:', error);
     res.status(500).json({ error: error.message || 'An error occurred while processing your request' });
   }
 };
+
+
+
+
 
 // shows if user has existing forms and if yes,displays the filled form
 export const getFormsCreatedByUser = async (req: Request, res: Response) => {
@@ -131,63 +158,65 @@ export const getFormsCreatedByUser = async (req: Request, res: Response) => {
       return res.status(401).json({ success: false, message: 'User not authenticated' });
     }
 
-    const stateForm = await db.stateForm.findFirst({
+    const stateForms = await db.stateForm.findMany({
       where: {
         userId: userId,
         status: 'UNUSED'
       }
     });
 
-    if (!stateForm) {
+    if (!stateForms || stateForms.length === 0) {
       return res.status(404).json({ success: false, message: 'No unused forms found for the user' });
     }
 
-   const transaction = await db.transaction.findFirst({
-      where: {
-        userId: userId
-      },
-      select: {
-        serviceId: true
-      }
-    });
+    const formsWithServiceId = await Promise.all(stateForms.map(async (stateForm) => {
+      const transaction = await db.transaction.findFirst({
+        where: {
+          clientReference: stateForm.clientReference
+        },
+        select: {
+          serviceId: true
+        }
+      });
 
-    const serviceId = transaction?.serviceId;
+      const serviceId = transaction?.serviceId;
+
+      return {
+        ...stateForm,
+        serviceId: serviceId
+      };
+    }));
 
     const applicationForms = await db.application.findMany({
       where: {
-          userId: userId
+        userId: userId
       },
       include: {
-          documents: true
+        documents: true
       }
-  });
+    });
 
-  const organizationForms = await db.organizationForm.findMany({
+    const organizationForms = await db.organizationForm.findMany({
       where: {
-          userId: userId
+        userId: userId
       },
       include: {
-          documents: true
+        documents: true
       }
-  });
+    });
 
-  const forms = [...applicationForms, ...organizationForms];
+    const forms = [...applicationForms, ...organizationForms];
 
-
-  const formsWithTypes = forms.map(form => {
-      if (form.formStatus === 'FILLED') {
-          return form;
-      } else {
-          return { id: form.id, type: form.type, formStatus: form.formStatus };
-      }
-  });
-
-  res.status(200).json({ success: true, forms: formsWithTypes, serviceId: serviceId });
-} catch (error: any) {
-  console.error('Error occurred while fetching forms:', error);
-  res.status(500).json({ success: false, error: 'An error occurred while processing your request' });
-}
+    res.status(200).json({ success: true, forms: [...formsWithServiceId, ...forms] });
+  } catch (error: any) {
+    console.error('Error occurred while fetching forms:', error);
+    res.status(500).json({ success: false, error: 'An error occurred while processing your request' });
+  }
 };
+
+
+
+
 
 
 

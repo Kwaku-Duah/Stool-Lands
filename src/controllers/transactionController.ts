@@ -1,9 +1,7 @@
 import { Request as ExpressRequest, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
 import { USERNAME_KEY, PASSWORD_KEY } from '../secrets';
-
-const prisma = new PrismaClient();
+import db from '../dbConfig/db'
 
 
 export interface User {
@@ -40,12 +38,12 @@ export const handlePaymentCallback = async (req: Request, res: Response) => {
 
       updateData.ProviderDescription = Description;
 
-      await prisma.transaction.update({
+      await db.transaction.update({
         where: { clientReference: ClientReference },
         data: updateData
       });
 
-      await prisma.stateForm.update({
+      await db.stateForm.update({
         where: { clientReference: ClientReference },
         data: { status: Status === 'Success' ? 'UNUSED' : 'EXPIRED' }
       });
@@ -61,10 +59,6 @@ export const handlePaymentCallback = async (req: Request, res: Response) => {
 
 
 
-// if the payment failed to update the state to EXPIRED
-//  providerDescription taken from the response
-
-
 export const checkUnusedFormForUser = async (req: Request, res: Response) => {
   const userId = req.user?.id;
 
@@ -72,7 +66,7 @@ export const checkUnusedFormForUser = async (req: Request, res: Response) => {
     if (!userId) {
       return res.status(401).json({ success: false, message: 'User not authenticated' });
     }
-    const stateForm = await prisma.stateForm.findFirst({
+    const stateForm = await db.stateForm.findFirst({
       where: { userId, status: 'UNUSED' }
     });
 
@@ -99,7 +93,7 @@ export async function checkTransactionStatus(req: Request, res: Response) {
     const authString = Buffer.from(USERNAME_KEY + ':' + PASSWORD_KEY).toString('base64');
 
 
-    const transaction = await prisma.transaction.findFirst({
+    const transaction = await db.transaction.findFirst({
       where: { clientReference }
     });
 

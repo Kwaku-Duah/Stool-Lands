@@ -2,7 +2,6 @@ import { Request as ExpressRequest, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { config } from 'dotenv';
-import { generateUniqueFormID } from '../utils/unique';
 import db from '../dbConfig/db'
 
 config();
@@ -44,7 +43,7 @@ export const createOrganizationForm = async (req: Request, res: Response) => {
       throw new Error('Documents should be an array');
     }
 
-    const uniqueFormID = generateUniqueFormID();
+    // const uniqueFormID = generateUniqueFormID();
 
     const uploadedDocumentUrls = await Promise.all(documents.map(async (document: any) => {
       const key = `organization/${userId}/${uuidv4()}-${document.image.split('/').pop()}`;
@@ -75,6 +74,21 @@ export const createOrganizationForm = async (req: Request, res: Response) => {
 
     const uploadedLogoUrl = `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${logoKey}`;
 
+
+    const stateForm = await db.stateForm.findFirst({
+      where: {
+        userId: userId,
+        status: 'UNUSED'
+      }
+    });
+
+
+    if (!stateForm) {
+      return res.status(404).json({ message: 'No unused stateForm found for the user' });
+    }
+
+    const uniqueFormID = stateForm.token;
+
     const organizationForm = await db.organizationForm.create({
       data: {
         uniqueFormID,
@@ -93,7 +107,7 @@ export const createOrganizationForm = async (req: Request, res: Response) => {
         dateOfOriginalTransfer,
         purposeOfLand,
         contactOfTransferor,
-        type:"org",
+        type: "org",
         documents: {
           createMany: {
             data: uploadedDocumentUrls
@@ -105,11 +119,21 @@ export const createOrganizationForm = async (req: Request, res: Response) => {
       }
     });
 
+    await db.stateForm.update({
+      where: {
+        id: stateForm.id
+      },
+      data: {
+        status: 'USED'
+      }
+    });
+
+
+
+
     res.status(201).json({ message: 'Organization form submitted successfully', organizationForm });
   } catch (error: any) {
     console.error('Error occurred in createOrganizationForm:', error);
     res.status(500).json({ error: error.message || 'An error occurred while processing your request' });
   }
 };
-
-// Updated the database

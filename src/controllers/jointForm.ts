@@ -2,7 +2,6 @@ import { Request as ExpressRequest, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import db from '../dbConfig/db'
-import { generateUniqueFormID } from '../utils/unique';
 import { config } from 'dotenv';
 
 config();
@@ -65,10 +64,27 @@ export const jointApplicationForm = async (req: Request, res: Response) => {
       };
     }));
 
-    const uniqueFormID = generateUniqueFormID();
+    // const uniqueFormID = generateUniqueFormID();
 
     const applicantNames = applicants.map(applicant => applicant.applicantName);
     const applicantDOBs = applicants.map(applicant => applicant.applicantDOB);
+
+
+    const stateForm = await db.stateForm.findFirst({
+      where: {
+        userId: userId,
+        status: 'UNUSED'
+      }
+    });
+
+
+    if (!stateForm) {
+      return res.status(404).json({ message: 'No unused stateForm found for the user' });
+    }
+
+    const uniqueFormID = stateForm.token;
+
+    console.log(uniqueFormID)
 
     const application = await db.application.create({
       data: {
@@ -97,7 +113,15 @@ export const jointApplicationForm = async (req: Request, res: Response) => {
         documents: true
     }
     });
-    
+
+    await db.stateForm.update({
+      where: {
+        id: stateForm.id
+      },
+      data: {
+        status: 'USED'
+      }
+    });
 
     res.status(201).json({ message: 'Application submitted successfully', application });
   } catch (error: any) {
