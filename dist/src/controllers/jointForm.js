@@ -7,7 +7,6 @@ exports.jointApplicationForm = void 0;
 const uuid_1 = require("uuid");
 const client_s3_1 = require("@aws-sdk/client-s3");
 const db_1 = __importDefault(require("../dbConfig/db"));
-const unique_1 = require("../utils/unique");
 const dotenv_1 = require("dotenv");
 (0, dotenv_1.config)();
 const s3Client = new client_s3_1.S3Client({
@@ -49,9 +48,20 @@ const jointApplicationForm = async (req, res) => {
                 image: `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${key}`
             };
         }));
-        const uniqueFormID = (0, unique_1.generateUniqueFormID)();
+        // const uniqueFormID = generateUniqueFormID();
         const applicantNames = applicants.map(applicant => applicant.applicantName);
         const applicantDOBs = applicants.map(applicant => applicant.applicantDOB);
+        const stateForm = await db_1.default.stateForm.findFirst({
+            where: {
+                userId: userId,
+                status: 'UNUSED'
+            }
+        });
+        if (!stateForm) {
+            return res.status(404).json({ message: 'No unused stateForm found for the user' });
+        }
+        const uniqueFormID = stateForm.token;
+        console.log(uniqueFormID);
         const application = await db_1.default.application.create({
             data: {
                 uniqueFormID,
@@ -77,6 +87,14 @@ const jointApplicationForm = async (req, res) => {
             },
             include: {
                 documents: true
+            }
+        });
+        await db_1.default.stateForm.update({
+            where: {
+                id: stateForm.id
+            },
+            data: {
+                status: 'USED'
             }
         });
         res.status(201).json({ message: 'Application submitted successfully', application });

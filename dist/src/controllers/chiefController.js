@@ -1,12 +1,15 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createChief = void 0;
 const bcrypt_1 = require("bcrypt");
 const client_1 = require("@prisma/client");
 const backRoom_1 = require("../services/backRoom");
-const prisma = new client_1.PrismaClient();
+const db_1 = __importDefault(require("../dbConfig/db"));
 const generateChiefId = async () => {
-    const existingChiefCount = await prisma.chief.count();
+    const existingChiefCount = await db_1.default.chief.count();
     const chiefCount = existingChiefCount + 1;
     const chiefId = `CHIEF-${chiefCount.toString().padStart(3, '0')}`;
     return chiefId;
@@ -21,7 +24,7 @@ const createChief = async (req, res) => {
             return res.status(400).json({ error: 'Password must be at least 8 characters long' });
         }
         const hashedPassword = (0, bcrypt_1.hashSync)(newPassword, 10);
-        const newUser = await prisma.user.create({
+        const newUser = await db_1.default.user.create({
             data: {
                 name,
                 email,
@@ -32,13 +35,13 @@ const createChief = async (req, res) => {
             },
         });
         const chiefId = await generateChiefId();
-        const newChief = await prisma.chief.create({
+        const newChief = await db_1.default.chief.create({
             data: {
                 email: newUser.email,
                 chiefId,
             },
         });
-        const user = await prisma.user.findFirst({
+        const user = await db_1.default.user.findFirst({
             where: {
                 email: email
             }

@@ -7,7 +7,6 @@ exports.createOrganizationForm = void 0;
 const uuid_1 = require("uuid");
 const client_s3_1 = require("@aws-sdk/client-s3");
 const dotenv_1 = require("dotenv");
-const unique_1 = require("../utils/unique");
 const db_1 = __importDefault(require("../dbConfig/db"));
 (0, dotenv_1.config)();
 const s3Client = new client_s3_1.S3Client({
@@ -28,7 +27,7 @@ const createOrganizationForm = async (req, res) => {
         if (!Array.isArray(documents)) {
             throw new Error('Documents should be an array');
         }
-        const uniqueFormID = (0, unique_1.generateUniqueFormID)();
+        // const uniqueFormID = generateUniqueFormID();
         const uploadedDocumentUrls = await Promise.all(documents.map(async (document) => {
             const key = `organization/${userId}/${(0, uuid_1.v4)()}-${document.image.split('/').pop()}`;
             const params = {
@@ -52,6 +51,16 @@ const createOrganizationForm = async (req, res) => {
         };
         await s3Client.send(new client_s3_1.PutObjectCommand(logoParams));
         const uploadedLogoUrl = `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${logoKey}`;
+        const stateForm = await db_1.default.stateForm.findFirst({
+            where: {
+                userId: userId,
+                status: 'UNUSED'
+            }
+        });
+        if (!stateForm) {
+            return res.status(404).json({ message: 'No unused stateForm found for the user' });
+        }
+        const uniqueFormID = stateForm.token;
         const organizationForm = await db_1.default.organizationForm.create({
             data: {
                 uniqueFormID,
@@ -81,6 +90,14 @@ const createOrganizationForm = async (req, res) => {
                 User: { connect: { id: userId } }
             }
         });
+        await db_1.default.stateForm.update({
+            where: {
+                id: stateForm.id
+            },
+            data: {
+                status: 'USED'
+            }
+        });
         res.status(201).json({ message: 'Organization form submitted successfully', organizationForm });
     }
     catch (error) {
@@ -89,4 +106,3 @@ const createOrganizationForm = async (req, res) => {
     }
 };
 exports.createOrganizationForm = createOrganizationForm;
-// Updated the database

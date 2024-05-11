@@ -4,10 +4,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.checkTransactionStatus = exports.checkUnusedFormForUser = exports.handlePaymentCallback = void 0;
-const client_1 = require("@prisma/client");
 const axios_1 = __importDefault(require("axios"));
 const secrets_1 = require("../secrets");
-const prisma = new client_1.PrismaClient();
+const db_1 = __importDefault(require("../dbConfig/db"));
 const handlePaymentCallback = async (req, res) => {
     try {
         const { Status, Data } = req.body;
@@ -29,11 +28,11 @@ const handlePaymentCallback = async (req, res) => {
                 updateData.Channel = PaymentDetails.Channel || null;
             }
             updateData.ProviderDescription = Description;
-            await prisma.transaction.update({
+            await db_1.default.transaction.update({
                 where: { clientReference: ClientReference },
                 data: updateData
             });
-            await prisma.stateForm.update({
+            await db_1.default.stateForm.update({
                 where: { clientReference: ClientReference },
                 data: { status: Status === 'Success' ? 'UNUSED' : 'EXPIRED' }
             });
@@ -47,15 +46,13 @@ const handlePaymentCallback = async (req, res) => {
     }
 };
 exports.handlePaymentCallback = handlePaymentCallback;
-// if the payment failed to update the state to EXPIRED
-//  providerDescription taken from the response
 const checkUnusedFormForUser = async (req, res) => {
     const userId = req.user?.id;
     try {
         if (!userId) {
             return res.status(401).json({ success: false, message: 'User not authenticated' });
         }
-        const stateForm = await prisma.stateForm.findFirst({
+        const stateForm = await db_1.default.stateForm.findFirst({
             where: { userId, status: 'UNUSED' }
         });
         if (stateForm) {
@@ -76,13 +73,14 @@ async function checkTransactionStatus(req, res) {
     console.log(clientReference);
     try {
         const authString = Buffer.from(secrets_1.USERNAME_KEY + ':' + secrets_1.PASSWORD_KEY).toString('base64');
-        const transaction = await prisma.transaction.findFirst({
+        const transaction = await db_1.default.transaction.findFirst({
             where: { clientReference }
         });
         if (!transaction)
             return res.status(404).json({ success: false, message: "Failed to find transaction" });
         if (transaction.status === 'COMPLETED')
             return res.json({ success: true, message: "Successful transaction" });
+        // Using Hubtel's API to check...
         if (transaction.status === 'PENDING') {
             const url = `https://api-txnstatus.hubtel.com/transactions/11684/status?clientReference=${clientReference}`;
             const transactionStatusResponse = await axios_1.default.get(url, {

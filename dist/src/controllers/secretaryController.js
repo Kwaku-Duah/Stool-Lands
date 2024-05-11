@@ -1,12 +1,15 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createSecretary = void 0;
 const bcrypt_1 = require("bcrypt");
 const client_1 = require("@prisma/client");
 const backRoom_1 = require("../services/backRoom");
-const prisma = new client_1.PrismaClient();
+const db_1 = __importDefault(require("../dbConfig/db"));
 const generateSecretaryId = async () => {
-    const existingSecretaryCount = await prisma.secretary.count();
+    const existingSecretaryCount = await db_1.default.secretary.count();
     const secretaryCount = existingSecretaryCount + 1;
     const secretaryId = `SECRETARY-${secretaryCount.toString().padStart(3, '0')}`;
     return secretaryId;
@@ -21,7 +24,7 @@ const createSecretary = async (req, res) => {
             return res.status(400).json({ error: 'Password must be at least 8 characters long' });
         }
         const hashedPassword = (0, bcrypt_1.hashSync)(newPassword, 10);
-        const newUser = await prisma.user.create({
+        const newUser = await db_1.default.user.create({
             data: {
                 name,
                 email,
@@ -32,13 +35,13 @@ const createSecretary = async (req, res) => {
             },
         });
         const secretaryId = await generateSecretaryId();
-        const newSecretary = await prisma.secretary.create({
+        const newSecretary = await db_1.default.secretary.create({
             data: {
                 email: newUser.email,
                 secretaryId,
             },
         });
-        const user = await prisma.user.findFirst({
+        const user = await db_1.default.user.findFirst({
             where: {
                 email: email
             }

@@ -199,7 +199,7 @@ export const getFormsCreatedByUser = async (req: Request, res: Response) => {
       }
     });
 
-    
+
     const forms = [...applicationForms, ...organizationForms];
 
     res.status(200).json({ success: true, forms: [...formsWithServiceId, ...forms] });
@@ -208,10 +208,6 @@ export const getFormsCreatedByUser = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, error: 'An error occurred while processing your request' });
   }
 };
-
-
-
-
 
 
 
