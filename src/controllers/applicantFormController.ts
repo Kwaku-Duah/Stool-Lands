@@ -199,6 +199,7 @@ export const getFormsCreatedByUser = async (req: Request, res: Response) => {
       }
     });
 
+    
     const forms = [...applicationForms, ...organizationForms];
 
     res.status(200).json({ success: true, forms: [...formsWithServiceId, ...forms] });

@@ -22,7 +22,7 @@ app.use(
 
 app.use('/', rootRouter);
 app.get('/hello', (req, res) => {
-  res.send('Hello to the pakyi lands, you are through');
+  res.send('Hello to the pakyi lands, you are through, I want to see if this change has reflected truly');
 });
 
 swaggerDoc(app);
