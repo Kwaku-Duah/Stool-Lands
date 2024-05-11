@@ -1,13 +1,11 @@
 import { Request, Response } from 'express';
 import { hashSync } from 'bcrypt';
-import { PrismaClient,ROLE } from '@prisma/client';
+import {  ROLE } from '@prisma/client';
 import { backroomMessage } from '../services/backRoom';
-import { Inspector } from 'aws-sdk';
-
-const prisma = new PrismaClient();
+import db from '../dbConfig/db'
 
 const generateInspectorId = async (): Promise<string> => {
-  const existingInspectorCount = await prisma.inspector.count();
+  const existingInspectorCount = await db.inspector.count();
   const inspectorCount = existingInspectorCount + 1;
   const inspectorId = `INSPECTOR-${inspectorCount.toString().padStart(3, '0')}`;
   return inspectorId;
@@ -27,7 +25,7 @@ export const createInspector = async (req: Request, res: Response) => {
 
     const hashedPassword = hashSync(newPassword, 10);
 
-    const newUser = await prisma.user.create({
+    const newUser = await db.user.create({
       data: {
         name,
         email,
@@ -40,14 +38,14 @@ export const createInspector = async (req: Request, res: Response) => {
 
     const inspectorId = await generateInspectorId();
 
-    const newInspector = await prisma.inspector.create({
+    const newInspector = await db.inspector.create({
       data: {
         email: newUser.email!,
         inspectorId,
       },
     });
 
-    const user = await prisma.user.findFirst({
+    const user = await db.user.findFirst({
       where: {
         email: email
       }

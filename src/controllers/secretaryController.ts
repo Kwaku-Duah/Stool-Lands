@@ -1,12 +1,11 @@
 import { Request, Response } from 'express';
 import { hashSync } from 'bcrypt';
-import { PrismaClient,ROLE } from '@prisma/client';
+import { ROLE } from '@prisma/client';
 import { backroomMessage } from '../services/backRoom';
-
-const prisma = new PrismaClient();
+import db from '../dbConfig/db'
 
 const generateSecretaryId = async (): Promise<string> => {
-  const existingSecretaryCount = await prisma.secretary.count();
+  const existingSecretaryCount = await db.secretary.count();
   const secretaryCount = existingSecretaryCount + 1;
   const secretaryId = `SECRETARY-${secretaryCount.toString().padStart(3, '0')}`;
   return secretaryId;
@@ -26,7 +25,7 @@ export const createSecretary = async (req: Request, res: Response) => {
 
     const hashedPassword = hashSync(newPassword, 10);
 
-    const newUser = await prisma.user.create({
+    const newUser = await db.user.create({
       data: {
         name,
         email,
@@ -39,14 +38,14 @@ export const createSecretary = async (req: Request, res: Response) => {
 
     const secretaryId = await generateSecretaryId();
 
-    const newSecretary = await prisma.secretary.create({
+    const newSecretary = await db.secretary.create({
       data: {
         email: newUser.email!,
         secretaryId,
       },
     });
 
-    const user = await prisma.user.findFirst({
+    const user = await db.user.findFirst({
       where: {
         email: email
       }

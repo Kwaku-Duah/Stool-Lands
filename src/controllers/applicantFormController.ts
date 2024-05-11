@@ -14,7 +14,6 @@ const s3Client = new S3Client({
   }
 });
 
-
 export interface User {
   id: number;
   role: string;
@@ -31,7 +30,6 @@ export const fillApplicationForm = async (req: Request, res: Response) => {
     if (!userId) {
       return res.status(401).json({ message: 'User not authenticated' });
     }
-
 
 
     const {
@@ -55,7 +53,6 @@ export const fillApplicationForm = async (req: Request, res: Response) => {
       throw new Error(`User with ID ${userId} does not exist`);
     }
 
-    // const uniqueFormID = generateUniqueFormID();
 
     const uploadedDocumentUrls = await Promise.all(documents.map(async (document: any) => {
       const key = `${userId}/${uuidv4()}-${document.image.split('/').pop()}`;
@@ -147,9 +144,6 @@ export const fillApplicationForm = async (req: Request, res: Response) => {
 
 
 
-
-
-// shows if user has existing forms and if yes,displays the filled form
 export const getFormsCreatedByUser = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;

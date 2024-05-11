@@ -5,7 +5,6 @@ import { backroomMessage } from '../services/backRoom';
 import db from '../dbConfig/db'
 
 
-
 const generateChiefId = async (): Promise<string> => {
   const existingChiefCount = await db.chief.count();
   const chiefCount = existingChiefCount + 1;
