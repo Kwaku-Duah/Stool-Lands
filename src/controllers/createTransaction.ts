@@ -88,8 +88,6 @@ export const createTransaction = async (req: Request, res: Response) => {
         body: JSON.stringify({
           totalAmount: service.amount,
           description: service.description,
-
-
           callbackUrl: 'https://pakyi-w1wnypb2.b4a.run/transaction/callback',
           returnUrl,
           cancellationUrl: 'https://xorvey-git-main-gloriatampuris-projects-0969866d.vercel.app',
