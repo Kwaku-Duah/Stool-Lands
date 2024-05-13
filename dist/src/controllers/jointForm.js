@@ -19,36 +19,33 @@ const s3Client = new client_s3_1.S3Client({
 const jointApplicationForm = async (req, res) => {
     try {
         const userId = req.user?.id;
-        console.log(userId);
         if (!userId) {
             return res.status(401).json({ message: 'User not authenticated' });
         }
-        const { applicants, landDetails, payments, documents } = req.body;
+        const { applicants, landDetails } = req.body;
         if (!Array.isArray(applicants) || !applicants.length) {
             throw new Error('Applicants data should be a non-empty array');
         }
         if (!landDetails || typeof landDetails !== 'object') {
             throw new Error('Land details should be provided as an object');
         }
-        if (!Array.isArray(documents)) {
-            throw new Error('Documents should be an array');
+        // Check if any file is uploaded
+        if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+            return res.status(400).json({ error: 'No documents uploaded' });
         }
-        const uploadedDocumentUrls = await Promise.all(documents.map(async (document) => {
-            const key = `organization/${userId}/${(0, uuid_1.v4)()}-${document.image.split('/').pop()}`;
+        const uploadedDocumentUrls = await Promise.all(Object.values(req.files).map(async (file) => {
+            const key = `${userId}/${(0, uuid_1.v4)()}-${file.originalname}`;
             const params = {
                 Bucket: process.env.BUCKET_NAME,
                 Key: key,
-                Body: document.data,
-                ContentType: document.mimetype,
-                ContentLength: document.size
+                Body: file.buffer,
+                ContentType: file.mimetype
             };
             await s3Client.send(new client_s3_1.PutObjectCommand(params));
             return {
-                type: document.type,
-                image: `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${key}`
+                url: `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${key}`
             };
         }));
-        // const uniqueFormID = generateUniqueFormID();
         const applicantNames = applicants.map(applicant => applicant.applicantName);
         const applicantDOBs = applicants.map(applicant => applicant.applicantDOB);
         const stateForm = await db_1.default.stateForm.findFirst({

@@ -24,96 +24,77 @@ const fillApplicationForm = async (req, res) => {
         if (!userId) {
             return res.status(401).json({ message: 'User not authenticated' });
         }
-        const { applicantName, applicantDOB, mailingAddress, contactNumber, emailAddress, placeOfResidence, hometown, maritalStatus, nextOfKin, landLocality, siteName, plotNumbers, totalLandSize, streetName, landTransferor, dateOfOriginalTransfer, purposeOfLand, contactOfTransferor, documents } = req.body;
-        console.log(req.body);
-        if (!Array.isArray(documents)) {
-            throw new Error('Documents should be an array');
+        const { applicantName, applicantDOB, mailingAddress, contactNumber, emailAddress, placeOfResidence, hometown, maritalStatus, nextOfKin, landLocality, siteName, plotNumbers, totalLandSize, streetName, landTransferor, dateOfOriginalTransfer, purposeOfLand, contactOfTransferor } = req.body;
+        if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+            return res.status(400).json({ error: 'No documents uploaded' });
         }
-        const existingUser = await db_1.default.user.findUnique({
-            where: { id: userId }
+        const uploadedDocumentUrls = await Promise.all(Object.values(req.files).map(async (file) => {
+            const key = `${userId}/${(0, uuid_1.v4)()}-${file.originalname}`;
+            const params = {
+                Bucket: process.env.BUCKET_NAME,
+                Key: key,
+                Body: file.buffer,
+                ContentType: file.mimetype
+            };
+            await s3Client.send(new client_s3_1.PutObjectCommand(params));
+            return {
+                url: `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${key}`
+            };
+        }));
+        const stateForm = await db_1.default.stateForm.findFirst({
+            where: {
+                userId: userId,
+                status: 'UNUSED'
+            }
         });
-        console.log(existingUser);
-        if (!existingUser) {
-            throw new Error(`User with ID ${userId} does not exist`);
+        if (!stateForm) {
+            return res.status(404).json({ message: 'No unused stateForm found for the user' });
         }
-        upload.array('documents')(req, res, async (err) => {
-            if (err) {
-                return res.status(400).json({ error: "Nothing is been uploaded" });
-            }
-            const documents = req.files;
-            console.log("ARE DOCUMENTS PARSED", documents);
-            if (!Array.isArray(documents) || documents.length === 0) {
-                return res.status(400).json({ error: 'No documents uploaded' });
-            }
-            const uploadedDocumentUrls = await Promise.all(documents.map(async (document) => {
-                const key = `${userId}/${(0, uuid_1.v4)()}-${document.originalname}`;
-                const params = {
-                    Bucket: process.env.BUCKET_NAME,
-                    Key: key,
-                    Body: document.buffer,
-                    ContentType: document.mimetype
-                };
-                await s3Client.send(new client_s3_1.PutObjectCommand(params));
-                return {
-                    type: document.type,
-                    url: `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${key}`
-                };
-            }));
-            const stateForm = await db_1.default.stateForm.findFirst({
-                where: {
-                    userId: userId,
-                    status: 'UNUSED'
-                }
-            });
-            if (!stateForm) {
-                return res.status(404).json({ message: 'No unused stateForm found for the user' });
-            }
-            const uniqueFormID = stateForm.token;
-            const application = await db_1.default.application.create({
-                data: {
-                    uniqueFormID,
-                    applicantName,
-                    applicantDOB,
-                    mailingAddress,
-                    contactNumber,
-                    emailAddress,
-                    placeOfResidence,
-                    hometown,
-                    maritalStatus,
-                    nextOfKin,
-                    landLocality,
-                    siteName,
-                    plotNumbers,
-                    totalLandSize,
-                    streetName,
-                    landTransferor,
-                    dateOfOriginalTransfer,
-                    purposeOfLand,
-                    contactOfTransferor,
-                    type: "individual",
-                    documents: {
-                        createMany: {
-                            data: uploadedDocumentUrls
-                        }
-                    },
-                    formStatus: 'FILLED',
-                    status: 'PENDING',
-                    User: { connect: { id: userId } }
+        const uniqueFormID = stateForm.token;
+        const application = await db_1.default.application.create({
+            data: {
+                uniqueFormID,
+                applicantName,
+                applicantDOB,
+                mailingAddress,
+                contactNumber,
+                emailAddress,
+                placeOfResidence,
+                hometown,
+                maritalStatus,
+                nextOfKin,
+                landLocality,
+                siteName,
+                plotNumbers,
+                totalLandSize,
+                streetName,
+                landTransferor,
+                dateOfOriginalTransfer,
+                purposeOfLand,
+                contactOfTransferor,
+                type: "individual",
+                documents: {
+                    createMany: {
+                        data: uploadedDocumentUrls
+                    }
                 },
-                include: {
-                    documents: true
-                }
-            });
-            await db_1.default.stateForm.update({
-                where: {
-                    id: stateForm.id
-                },
-                data: {
-                    status: 'USED'
-                }
-            });
-            res.status(201).json({ message: 'Application submitted successfully', application });
+                formStatus: 'FILLED',
+                status: 'PENDING',
+                User: { connect: { id: userId } }
+            },
+            include: {
+                documents: true
+            }
         });
+        await db_1.default.stateForm.update({
+            where: {
+                id: stateForm.id
+            },
+            data: {
+                status: 'USED'
+            }
+        });
+        res.status(201).json({ message: 'Application submitted successfully', application });
     }
     catch (error) {
         console.error('Error occurred in fillApplicationForm:', error);
@@ -127,30 +108,6 @@ const getFormsCreatedByUser = async (req, res) => {
         if (!userId) {
             return res.status(401).json({ success: false, message: 'User not authenticated' });
         }
-        const stateForms = await db_1.default.stateForm.findMany({
-            where: {
-                userId: userId,
-                status: 'UNUSED'
-            }
-        });
-        if (!stateForms || stateForms.length === 0) {
-            return res.status(404).json({ success: false, message: 'No unused forms found for the user' });
-        }
-        const formsWithServiceId = await Promise.all(stateForms.map(async (stateForm) => {
-            const transaction = await db_1.default.transaction.findFirst({
-                where: {
-                    clientReference: stateForm.clientReference
-                },
-                select: {
-                    serviceId: true
-                }
-            });
-            const serviceId = transaction?.serviceId;
-            return {
-                ...stateForm,
-                serviceId: serviceId
-            };
-        }));
         const applicationForms = await db_1.default.application.findMany({
             where: {
                 userId: userId
@@ -167,7 +124,31 @@ const getFormsCreatedByUser = async (req, res) => {
                 documents: true
             }
         });
+        const stateForms = await db_1.default.stateForm.findMany({
+            where: {
+                userId: userId,
+                status: 'UNUSED'
+            }
+        });
+        const formsWithServiceId = await Promise.all(stateForms.map(async (stateForm) => {
+            const transaction = await db_1.default.transaction.findFirst({
+                where: {
+                    clientReference: stateForm.clientReference
+                },
+                select: {
+                    serviceId: true
+                }
+            });
+            const serviceId = transaction?.serviceId;
+            return {
+                ...stateForm,
+                serviceId: serviceId
+            };
+        }));
         const forms = [...applicationForms, ...organizationForms];
+        if (!stateForms || stateForms.length === 0) {
+            return res.status(404).json({ success: false, message: 'No unused forms found for the user ', forms: [...formsWithServiceId, ...forms] });
+        }
         res.status(200).json({ success: true, forms: [...formsWithServiceId, ...forms] });
     }
     catch (error) {

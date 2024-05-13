@@ -8,6 +8,7 @@ const node_fetch_1 = __importDefault(require("node-fetch"));
 const secrets_1 = require("../secrets");
 const db_1 = __importDefault(require("../dbConfig/db"));
 const unique_1 = require("../utils/unique");
+const secrets_2 = require("../secrets");
 function generateClientReference() {
     const timestamp = Date.now().toString();
     const random = Math.floor(Math.random() * 1000).toString();
@@ -68,12 +69,10 @@ const createTransaction = async (req, res) => {
                 body: JSON.stringify({
                     totalAmount: service.amount,
                     description: service.description,
-                    // changed the address merchantAccountNumber 2021177
-                    // callbackUrl: 'https://webhook.site/9c84d2a4-868d-43b8-a185-ed1d3f2ad904',
                     callbackUrl: 'https://pakyi-w1wnypb2.b4a.run/transaction/callback',
                     returnUrl,
                     cancellationUrl: 'https://xorvey-git-main-gloriatampuris-projects-0969866d.vercel.app',
-                    merchantAccountNumber: '11684',
+                    merchantAccountNumber: secrets_2.MERCHANT_CODE,
                     clientReference,
                     customerName,
                     phoneNumber
