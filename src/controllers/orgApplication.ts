@@ -34,45 +34,35 @@ export const createOrganizationForm = async (req: Request, res: Response) => {
 
     const {
       organisationName, location, mailingAddress, contactNumber,
-      emailAddress, organizationLogo, landLocality, siteName, plotNumbers, totalLandSize,
+      emailAddress, landLocality, siteName, plotNumbers, totalLandSize,
       streetName, landTransferor, dateOfOriginalTransfer, purposeOfLand,
-      contactOfTransferor, documents
+      contactOfTransferor
     } = req.body;
 
-    if (!Array.isArray(documents)) {
-      throw new Error('Documents should be an array');
+    // Check if any file is uploaded
+    if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+      return res.status(400).json({ error: 'No documents uploaded' });
     }
 
-    // const uniqueFormID = generateUniqueFormID();
 
-    const uploadedDocumentUrls = await Promise.all(documents.map(async (document: any) => {
-      const key = `organization/${userId}/${uuidv4()}-${document.image.split('/').pop()}`;
+    const uploadedDocumentUrls = await Promise.all(
+      Object.values(req.files).map(async (file: any) => {
+        const key = `${userId}/${uuidv4()}-${file.originalname}`;
+        const params = {
+          Bucket: process.env.BUCKET_NAME!,
+          Key: key,
+          Body: file.buffer,
+          ContentType: file.mimetype
+        };
 
-      const params = {
-        Bucket: process.env.BUCKET_NAME!,
-        Key: key,
-        Body: document.data,
-        ContentType: document.mimetype
-      };
+        await s3Client.send(new PutObjectCommand(params));
 
-      await s3Client.send(new PutObjectCommand(params));
+        return {
+          url: `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${key}`
+        };
+      })
+    );
 
-      return {
-        type: document.type,
-        image: `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${key}`
-      };
-    }));
-
-    const logoKey = `organization/${userId}/${uuidv4()}-logo.jpg`;
-    const logoParams = {
-      Bucket: process.env.BUCKET_NAME!,
-      Key: logoKey,
-      Body: organizationLogo,
-      ContentType: 'image/jpeg'
-    };
-    await s3Client.send(new PutObjectCommand(logoParams));
-
-    const uploadedLogoUrl = `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${logoKey}`;
 
 
     const stateForm = await db.stateForm.findFirst({
@@ -97,7 +87,6 @@ export const createOrganizationForm = async (req: Request, res: Response) => {
         mailingAddress,
         contactNumber,
         emailAddress,
-        organizationLogo: uploadedLogoUrl,
         landLocality,
         siteName,
         plotNumbers,
@@ -107,7 +96,7 @@ export const createOrganizationForm = async (req: Request, res: Response) => {
         dateOfOriginalTransfer,
         purposeOfLand,
         contactOfTransferor,
-        type: "org",
+        type: "organization",
         documents: {
           createMany: {
             data: uploadedDocumentUrls
@@ -116,6 +105,9 @@ export const createOrganizationForm = async (req: Request, res: Response) => {
         formStatus: 'FILLED',
         status: 'PENDING',
         User: { connect: { id: userId } }
+      },
+      include: {
+        documents: true
       }
     });
 
@@ -127,9 +119,6 @@ export const createOrganizationForm = async (req: Request, res: Response) => {
         status: 'USED'
       }
     });
-
-
-
 
     res.status(201).json({ message: 'Organization form submitted successfully', organizationForm });
   } catch (error: any) {

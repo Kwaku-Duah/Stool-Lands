@@ -3,6 +3,16 @@ info:
   version: 1.0.0
   title: Your API Title
   description: Your API Description
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT  # Optional, specify the format of the bearer token if needed
+
+security:
+  - bearerAuth: []  # Apply the bearerAuth security scheme globally
 paths:
   /auth/signup:
     post:
@@ -738,89 +748,65 @@ paths:
 
 
 
-/new/fill-application:
+/new/apply:
   post:
-    summary: Submit individual application form
-    description: Submit an individual application form for land registration.
-    security:
-      - bearerAuth: []
+    summary: Fill application form
+    description: Submit an application form with required documents
     requestBody:
       required: true
       content:
-        application/json:
+        multipart/form-data:
           schema:
             type: object
             properties:
               applicantName:
                 type: string
-                description: Name of the applicant.
               applicantDOB:
-                type: string
-                format: date
-                description: Date of birth of the applicant.
+                type: array
+                items:
+                  type: string
+                  format: date-time
               mailingAddress:
                 type: string
-                description: Mailing address of the applicant.
               contactNumber:
                 type: string
-                description: Contact number of the applicant.
               emailAddress:
                 type: string
                 format: email
-                description: Email address of the applicant.
               placeOfResidence:
                 type: string
-                description: Place of residence of the applicant.
               hometown:
                 type: string
-                description: Hometown of the applicant.
               maritalStatus:
                 type: string
-                description: Marital status of the applicant.
               nextOfKin:
                 type: string
-                description: Next of kin of the applicant.
               landLocality:
                 type: string
-                description: Locality of the land.
               siteName:
                 type: string
-                description: Name of the site.
               plotNumbers:
                 type: string
-                description: Plot numbers.
               totalLandSize:
-                type: number
-                description: Total land size.
+                type: string
               streetName:
                 type: string
-                description: Name of the street.
               landTransferor:
                 type: string
-                description: Name of the land transferor.
               dateOfOriginalTransfer:
                 type: string
                 format: date
-                description: Date of original land transfer.
               purposeOfLand:
                 type: string
-                description: Purpose of the land.
               contactOfTransferor:
                 type: string
-                description: Contact of the land transferor.
               documents:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    type:
-                      type: string
-                      description: Type of the document.
-                    image:
-                      type: string
-                      format: uri
-                      description: URL of the document image.
-                description: Array of documents uploaded.
+                  type: string
+                  format: binary
+    security:
+      - bearerAuth: [] 
     responses:
       '201':
         description: Application submitted successfully
@@ -831,84 +817,67 @@ paths:
               properties:
                 message:
                   type: string
-                  description: Success message indicating the form submission.
                 application:
                   type: object
-                  description: Details of the submitted application form.
                   properties:
                     uniqueFormID:
                       type: string
-                      description: Unique ID of the application form.
                     applicantName:
                       type: string
-                      description: Name of the applicant.
                     applicantDOB:
-                      type: string
-                      format: date
-                      description: Date of birth of the applicant.
+                      type: array
+                      items:
+                        type: array
+                        format: date-time
                     mailingAddress:
                       type: string
-                      description: Mailing address of the applicant.
                     contactNumber:
                       type: string
-                      description: Contact number of the applicant.
                     emailAddress:
                       type: string
                       format: email
-                      description: Email address of the applicant.
                     placeOfResidence:
                       type: string
-                      description: Place of residence of the applicant.
                     hometown:
                       type: string
-                      description: Hometown of the applicant.
                     maritalStatus:
                       type: string
-                      description: Marital status of the applicant.
                     nextOfKin:
                       type: string
-                      description: Next of kin of the applicant.
                     landLocality:
                       type: string
-                      description: Locality of the land.
                     siteName:
                       type: string
-                      description: Name of the site.
                     plotNumbers:
                       type: string
-                      description: Plot numbers.
                     totalLandSize:
-                      type: number
-                      description: Total land size.
+                      type: string
                     streetName:
                       type: string
-                      description: Name of the street.
                     landTransferor:
                       type: string
-                      description: Name of the land transferor.
                     dateOfOriginalTransfer:
                       type: string
                       format: date
-                      description: Date of original land transfer.
                     purposeOfLand:
                       type: string
-                      description: Purpose of the land.
                     contactOfTransferor:
                       type: string
-                      description: Contact of the land transferor.
-                    documents:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          type:
-                            type: string
-                            description: Type of the document.
-                          image:
-                            type: string
-                            format: uri
-                            description: URL of the document image.
-                      description: Array of documents uploaded.
+                    type:
+                      type: string
+                    formStatus:
+                      type: string
+                    status:
+                      type: string
+      '400':
+        description: No documents uploaded or bad request
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
       '401':
         description: User not authenticated
         content:
@@ -918,9 +887,17 @@ paths:
               properties:
                 message:
                   type: string
-                  description: Error message indicating user is not authenticated.
+      '404':
+        description: No unused stateForm found for the user
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
       '500':
-        description: Internal Server Error
+        description: An error occurred while processing the request
         content:
           application/json:
             schema:
@@ -928,7 +905,6 @@ paths:
               properties:
                 error:
                   type: string
-                  description: Error message indicating an internal server error occurred.
 
 
 
@@ -1093,7 +1069,7 @@ paths:
     requestBody:
       required: true
       content:
-        application/json:
+        multipart/form-data:
           schema:
             type: object
             properties:
@@ -1192,10 +1168,6 @@ paths:
                       type: string
                       format: email
                       description: Email address of the organization.
-                    organizationLogo:
-                      type: string
-                      format: uri
-                      description: URL of the organization logo.
                     landLocality:
                       type: string
                       description: Locality of the land.
@@ -1257,7 +1229,6 @@ paths:
                 error:
                   type: string
                   description: Error message indicating an internal server error occurred.
-
 
 
 

@@ -3,18 +3,19 @@ import { fillApplicationForm,getFormsCreatedByUser,createReport } from '../contr
 import { createOrganizationForm } from '../controllers/orgApplication';
 import { jointApplicationForm } from '../controllers/jointForm';
 import { authMiddleware,applicantMiddleware } from '../middleWares/authMiddleware';
+import upload from '../middleWares/uploadMulter'
 
 const router = express.Router();
 
 // Route to handle filling the application form with multer middleware
-router.post('/apply', [authMiddleware,applicantMiddleware],fillApplicationForm);
+router.post('/apply', [authMiddleware,applicantMiddleware],upload.array('documents'),fillApplicationForm);
 router.get('/applications',[authMiddleware,applicantMiddleware],getFormsCreatedByUser)
 // organization
 
-router.post('/org-apply',[authMiddleware,applicantMiddleware],createOrganizationForm)
+router.post('/org-apply',[authMiddleware,applicantMiddleware],upload.array('documents'),createOrganizationForm)
 
 // JOINT appliaction form
-router.post('/joint-apply',[authMiddleware,applicantMiddleware],jointApplicationForm)
+router.post('/joint-apply',[authMiddleware,applicantMiddleware],upload.array('documents'),jointApplicationForm)
 router.post('/report',createReport)
 
 export default router;

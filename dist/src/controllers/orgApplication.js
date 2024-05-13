@@ -27,9 +27,8 @@ const createOrganizationForm = async (req, res) => {
         if (!Array.isArray(documents)) {
             throw new Error('Documents should be an array');
         }
-        // const uniqueFormID = generateUniqueFormID();
         const uploadedDocumentUrls = await Promise.all(documents.map(async (document) => {
-            const key = `organization/${userId}/${(0, uuid_1.v4)()}-${document.image.split('/').pop()}`;
+            const key = `${userId}/${(0, uuid_1.v4)()}-${document.name}`;
             const params = {
                 Bucket: process.env.BUCKET_NAME,
                 Key: key,
@@ -39,7 +38,7 @@ const createOrganizationForm = async (req, res) => {
             await s3Client.send(new client_s3_1.PutObjectCommand(params));
             return {
                 type: document.type,
-                image: `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${key}`
+                url: `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${key}`
             };
         }));
         const logoKey = `organization/${userId}/${(0, uuid_1.v4)()}-logo.jpg`;
