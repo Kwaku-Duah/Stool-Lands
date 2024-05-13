@@ -15,3 +15,4 @@ export const password=process.env.PASSWORD
 export const senderId=process.env.SENDERID
 export const USERNAME_KEY=process.env.USERNAME_KEY
 export const PASSWORD_KEY=process.env.PASSWORD_KEY
+export const MERCHANT_CODE=process.env.MERCHANT_CODE

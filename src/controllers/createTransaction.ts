@@ -3,6 +3,7 @@ import fetch from 'node-fetch';
 import { USERNAME_KEY, PASSWORD_KEY } from '../secrets';
 import db from '../dbConfig/db'
 import { generateUniqueFormID } from '../utils/unique';
+import { MERCHANT_CODE } from '../secrets'
 
 
 function generateClientReference() {
@@ -88,14 +89,10 @@ export const createTransaction = async (req: Request, res: Response) => {
           totalAmount: service.amount,
           description: service.description,
 
-
-          // changed the address merchantAccountNumber 2021177
-
-          // callbackUrl: 'https://webhook.site/9c84d2a4-868d-43b8-a185-ed1d3f2ad904',
           callbackUrl: 'https://pakyi-w1wnypb2.b4a.run/transaction/callback',
           returnUrl,
           cancellationUrl: 'https://xorvey-git-main-gloriatampuris-projects-0969866d.vercel.app',
-          merchantAccountNumber: '2021177',
+          merchantAccountNumber: MERCHANT_CODE,
           clientReference,
           customerName,
           phoneNumber

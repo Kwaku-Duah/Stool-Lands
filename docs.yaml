@@ -627,8 +627,10 @@ paths:
 
 /transaction/callback:
   post:
-    summary: Handle payment callback
-    description: Endpoint to handle payment callback requests
+    summary: Handle payment callback.
+    description: Endpoint to handle payment callback requests.
+    security:
+      - bearerAuth: []
     requestBody:
       required: true
       content:
@@ -647,20 +649,20 @@ paths:
                 description: Additional data associated with the payment callback.
     responses:
       '200':
-        description: Payment callback received successfully
+        description: Payment callback received successfully.
         content:
           application/json:
             schema:
               type: object
               properties:
                 success:
-                  type: string
+                  type: boolean
                   description: Indicates whether the payment callback was successful.
                 message:
                   type: string
                   description: A success message indicating that the payment callback was received successfully.
       '500':
-        description: Internal Server Error
+        description: Internal Server Error.
         content:
           application/json:
             schema:
@@ -672,7 +674,7 @@ paths:
 
 
 /transaction/state:
-  get:
+  post:
     summary: Check transaction status using client reference to inspect whether an instant transaction was a success/failure
     description: Endpoint to check the status of a transaction using its client reference.
     requestBody:
@@ -910,13 +912,13 @@ paths:
 
 /new/applications:
   get:
-    summary: Get forms created by user if any, with type and if they have already filled a form, full form in response
-    description: Retrieve all forms created by the authenticated user.
+    summary: Get forms created by the authenticated user with relevant information.
+    description: Retrieve all forms created by the authenticated user with relevant details.
     security:
       - bearerAuth: []
     responses:
       '200':
-        description: Forms retrieved successfully
+        description: Forms retrieved successfully.
         content:
           application/json:
             schema:
@@ -1003,23 +1005,8 @@ paths:
                               format: uri
                               description: URL of the document image.
                         description: Array of documents uploaded.
-                      payments:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            paymentType:
-                              type: string
-                              description: Type of payment.
-                            amount:
-                              type: number
-                              description: Amount of payment.
-                            paymentStatus:
-                              type: string
-                              description: Status of payment.
-                        description: Array of payments made.
       '401':
-        description: User not authenticated
+        description: User not authenticated.
         content:
           application/json:
             schema:
@@ -1032,7 +1019,7 @@ paths:
                   type: string
                   description: Error message indicating the user is not authenticated.
       '404':
-        description: No unused forms found for the user
+        description: No unused forms found for the user.
         content:
           application/json:
             schema:
@@ -1045,7 +1032,7 @@ paths:
                   type: string
                   description: Error message indicating no unused forms were found for the user.
       '500':
-        description: Internal Server Error
+        description: Internal Server Error.
         content:
           application/json:
             schema:
@@ -1242,7 +1229,7 @@ paths:
     requestBody:
       required: true
       content:
-        application/json:
+        multipart/form-data:
           schema:
             type: object
             properties:
@@ -1316,15 +1303,8 @@ paths:
               documents:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    type:
-                      type: string
-                      description: Type of the document.
-                    image:
-                      type: string
-                      format: uri
-                      description: URL of the document image.
+                  type: string
+                  format: binary
                 description: Array of documents uploaded.
     responses:
       '201':
@@ -1402,19 +1382,6 @@ paths:
                     contactOfTransferor:
                       type: string
                       description: Contact of the land transferor.
-                    documents:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          type:
-                            type: string
-                            description: Type of the document.
-                          image:
-                            type: string
-                            format: uri
-                            description: URL of the document image.
-                      description: Array of documents uploaded.
       '401':
         description: User not authenticated
         content:
@@ -1435,6 +1402,9 @@ paths:
                 error:
                   type: string
                   description: Error message indicating an internal server error occurred.
+
+
+
 
 /new/report:
   post:
@@ -1520,10 +1490,8 @@ paths:
 
 /pay/transactions:
   post:
-    summary: Create a new transaction for payment, payment made first before availability of form for submission
+    summary: Create a new transaction for payment.
     description: Create a new transaction for processing payments.
-    security:
-      - bearerAuth: []
     requestBody:
       required: true
       content:
@@ -1542,7 +1510,7 @@ paths:
                 description: Phone number of the customer.
     responses:
       '200':
-        description: Transaction created successfully
+        description: Transaction created successfully.
         content:
           application/json:
             schema:
@@ -1552,7 +1520,7 @@ paths:
                   type: string
                   description: Response data from the payment provider.
       '400':
-        description: Bad request or validation error
+        description: Bad request or validation error.
         content:
           application/json:
             schema:
@@ -1562,7 +1530,7 @@ paths:
                   type: string
                   description: Error message indicating missing or invalid fields or service not found.
       '401':
-        description: Unauthorized
+        description: Unauthorized.
         content:
           application/json:
             schema:
@@ -1572,7 +1540,7 @@ paths:
                   type: string
                   description: Error message indicating user is not authenticated.
       '500':
-        description: Internal Server Error
+        description: Internal Server Error.
         content:
           application/json:
             schema:
@@ -1581,3 +1549,5 @@ paths:
                 error:
                   type: string
                   description: Error message indicating an internal server error occurred.
+    security:
+      - bearerAuth: []
