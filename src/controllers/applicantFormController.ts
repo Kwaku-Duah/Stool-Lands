@@ -194,7 +194,7 @@ export const getFormsCreatedByUser = async (req: Request, res: Response) => {
     const forms = [...applicationForms, ...organizationForms];
 
     if (!stateForms || stateForms.length === 0) {
-      return res.status(404).json({ success: false, message: 'No unused forms found for the user ', forms: [...formsWithServiceId, ...forms] });
+      return res.status(200).json({ success: false, message: 'No unused forms found for the user ', forms: [...formsWithServiceId, ...forms] });
     }
 
     res.status(200).json({ success: true, forms: [...formsWithServiceId, ...forms] });
