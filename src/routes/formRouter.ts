@@ -10,8 +10,8 @@ const router = express.Router();
 // Route to handle filling the application form with multer middleware
 router.post('/apply', [authMiddleware,applicantMiddleware],upload.any(),fillApplicationForm);
 router.get('/applications',[authMiddleware,applicantMiddleware],getFormsCreatedByUser)
-// organization
 
+// organization
 router.post('/org-apply',[authMiddleware,applicantMiddleware],upload.any(),createOrganizationForm)
 
 // JOINT appliaction form
