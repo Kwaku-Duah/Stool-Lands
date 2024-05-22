@@ -29,7 +29,6 @@ const jointApplicationForm = async (req, res) => {
         if (!landDetails || typeof landDetails !== 'object') {
             throw new Error('Land details should be provided as an object');
         }
-        // Check if any file is uploaded
         if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
             return res.status(400).json({ error: 'No documents uploaded' });
         }
