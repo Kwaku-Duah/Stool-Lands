@@ -30,8 +30,8 @@ app.get('/hello', (req, res) => {
 });
 
 app.use('/', rootRouter);
-app.get('/This is the backend for a stool land', (req, res) => {
-  res.send('Hello to the pakyi lands, you are through, true, proceed');
+app.get('/', (req, res) => {
+  res.send('This is the backend for a stool land');
 });
 
 
