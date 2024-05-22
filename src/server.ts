@@ -26,7 +26,7 @@ app.use(
 
 app.use('/', rootRouter);
 app.get('/hello', (req, res) => {
-  res.send('Hello to the pakyi lands, you are through, true, Rerun scope');
+  res.send('Hello to the pakyi lands, you are through, true, failed to proceed');
 });
 
 
