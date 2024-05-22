@@ -29,6 +29,12 @@ app.get('/hello', (req, res) => {
   res.send('Hello to the pakyi lands, you are through, true, failed to proceed');
 });
 
+app.use('/', rootRouter);
+app.get('/This is the backend for a stool land', (req, res) => {
+  res.send('Hello to the pakyi lands, you are through, true, proceed');
+});
+
+
 
 swaggerDoc(app);
 
