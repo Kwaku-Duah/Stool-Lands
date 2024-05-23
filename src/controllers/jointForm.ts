@@ -67,22 +67,51 @@ export const jointApplicationForm = async (req: Request, res: Response) => {
     const applicantNames = applicants.map(applicant => applicant.applicantName);
     const applicantDOBs = applicants.map(applicant => applicant.applicantDOB);
 
+    const endpoint = req.originalUrl;
+    console.log(endpoint)
+    const type = endpoint.includes('org-apply') ? 'organization' :
+                 endpoint.includes('joint-apply') ? 'joint' : 'individual';
 
-    const stateForm = await db.stateForm.findFirst({
-      where: {
-        userId: userId,
-        status: 'UNUSED'
+    const stateForms = await db.stateForm.findMany({
+      where: { userId, status: 'UNUSED' },
+      select: {
+        id: true,
+        clientReference: true,
+        token: true,
       }
     });
 
+    let validForm = null;
 
-    if (!stateForm) {
-      return res.status(404).json({ message: 'No unused stateForm found for the user' });
+    for (const stateForm of stateForms) {
+      const transaction = await db.transaction.findFirst({
+        where: {
+          clientReference: stateForm.clientReference,
+          serviceId: type
+        },
+        select: {
+          serviceId: true,
+        }
+      });
+
+      if (transaction?.serviceId === type) {
+        validForm = stateForm;
+
+        // Update the status of the state form to 'USED'
+        await db.stateForm.update({
+          where: { id: stateForm.id },
+          data: { status: 'USED' }
+        });
+
+        break;
+      }
     }
 
-    const uniqueFormID = stateForm.token;
+    if (!validForm) {
+      return res.status(404).json({ message: 'No valid forms found for the specified type' });
+    }
 
-    console.log(uniqueFormID)
+    const uniqueFormID = validForm.token;
 
     const application = await db.application.create({
       data: {
@@ -97,7 +126,7 @@ export const jointApplicationForm = async (req: Request, res: Response) => {
         nextOfKin: applicants.map(applicant => applicant.nextOfKin).join(' & '),
         maritalStatus: applicants.map(applicant => applicant.maritalStatus).join(' & '),
         ...landDetails,
-        type: "joint",
+        type,
         documents: {
           createMany: {
             data: uploadedDocumentUrls
@@ -112,14 +141,6 @@ export const jointApplicationForm = async (req: Request, res: Response) => {
       }
     });
 
-    await db.stateForm.update({
-      where: {
-        id: stateForm.id
-      },
-      data: {
-        status: 'USED'
-      }
-    });
 
     res.status(201).json({ message: 'Application submitted successfully', application });
   } catch (error: any) {

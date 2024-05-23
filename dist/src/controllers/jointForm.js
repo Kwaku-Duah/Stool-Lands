@@ -47,17 +47,43 @@ const jointApplicationForm = async (req, res) => {
         }));
         const applicantNames = applicants.map(applicant => applicant.applicantName);
         const applicantDOBs = applicants.map(applicant => applicant.applicantDOB);
-        const stateForm = await db_1.default.stateForm.findFirst({
-            where: {
-                userId: userId,
-                status: 'UNUSED'
+        const endpoint = req.originalUrl;
+        console.log(endpoint);
+        const type = endpoint.includes('org-apply') ? 'organization' :
+            endpoint.includes('joint-apply') ? 'joint' : 'individual';
+        const stateForms = await db_1.default.stateForm.findMany({
+            where: { userId, status: 'UNUSED' },
+            select: {
+                id: true,
+                clientReference: true,
+                token: true,
             }
         });
-        if (!stateForm) {
-            return res.status(404).json({ message: 'No unused stateForm found for the user' });
+        let validForm = null;
+        for (const stateForm of stateForms) {
+            const transaction = await db_1.default.transaction.findFirst({
+                where: {
+                    clientReference: stateForm.clientReference,
+                    serviceId: type
+                },
+                select: {
+                    serviceId: true,
+                }
+            });
+            if (transaction?.serviceId === type) {
+                validForm = stateForm;
+                // Update the status of the state form to 'USED'
+                await db_1.default.stateForm.update({
+                    where: { id: stateForm.id },
+                    data: { status: 'USED' }
+                });
+                break;
+            }
         }
-        const uniqueFormID = stateForm.token;
-        console.log(uniqueFormID);
+        if (!validForm) {
+            return res.status(404).json({ message: 'No valid forms found for the specified type' });
+        }
+        const uniqueFormID = validForm.token;
         const application = await db_1.default.application.create({
             data: {
                 uniqueFormID,
@@ -71,7 +97,7 @@ const jointApplicationForm = async (req, res) => {
                 nextOfKin: applicants.map(applicant => applicant.nextOfKin).join(' & '),
                 maritalStatus: applicants.map(applicant => applicant.maritalStatus).join(' & '),
                 ...landDetails,
-                type: "joint",
+                type,
                 documents: {
                     createMany: {
                         data: uploadedDocumentUrls
@@ -83,14 +109,6 @@ const jointApplicationForm = async (req, res) => {
             },
             include: {
                 documents: true
-            }
-        });
-        await db_1.default.stateForm.update({
-            where: {
-                id: stateForm.id
-            },
-            data: {
-                status: 'USED'
             }
         });
         res.status(201).json({ message: 'Application submitted successfully', application });

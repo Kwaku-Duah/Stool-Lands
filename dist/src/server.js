@@ -24,10 +24,10 @@ app.use((0, cors_1.default)({
 }));
 app.use('/', routes_1.default);
 app.get('/hello', (req, res) => {
-    res.send('Hello to the pakyi lands, you are through, true, failed to proceed');
+    res.send('Hello to the pakyi lands, you are through, THIS MUST WORK');
 });
 app.use('/', routes_1.default);
-app.get('/', (req, res) => {
+app.get('/hi', (req, res) => {
     res.send('This is the backend for a stool land');
 });
 (0, swaggerDoc_1.default)(app);
