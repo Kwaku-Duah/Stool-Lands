@@ -229,6 +229,34 @@ export const getFormsCreatedByUser = async (req: Request, res: Response) => {
 
 
 
+export const createTicket = async (req: Request, res: Response) => {
+  try {
+    const { email, issue,appNumber, priority, description } = req.body;
+
+    if (!email || !issue ||!appNumber || !priority || !description) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    const ticket = await db.ticket.create({
+      data: {
+        email,
+        issue,
+        appNumber,
+        priority,
+        description
+      }
+    });
+
+    //  New to send this issue to the secretary
+
+    res.status(201).json({ message: 'Your issue has been successfully raised', ticket });
+  } catch (error) {
+    console.error('Error occurred while creating ticket:', error);
+    res.status(500).json({ error: 'An error occurred while processing your request' });
+  }
+};
+
+
 export const createReport = async (req: Request, res: Response) => {
   try {
     const { email, issue, priority, description } = req.body;

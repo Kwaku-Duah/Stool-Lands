@@ -1551,3 +1551,96 @@ paths:
                   description: Error message indicating an internal server error occurred.
     security:
       - bearerAuth: []
+
+
+/new/issue:
+    post:
+      summary: Create a new support ticket
+      description: Endpoint to create a new support ticket by providing necessary details.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: The email address of the user.
+                  example: user@example.com
+                issue:
+                  type: string
+                  description: A brief description of the issue.
+                  example: "Unable to login"
+                appNumber:
+                  type: string
+                  description: Application number related to the issue.
+                  example: "APP123456"
+                priority:
+                  type: string
+                  description: Priority of the issue (e.g., low, medium, high).
+                  example: "high"
+                description:
+                  type: string
+                  description: Detailed description of the issue.
+                  example: "User is unable to login despite entering correct credentials."
+              required:
+                - email
+                - issue
+                - appNumber
+                - priority
+                - description
+      responses:
+        '201':
+          description: Successfully created the ticket.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Your issue has been successfully raised"
+                  ticket:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: ID of the created ticket.
+                        example: 1
+                      email:
+                        type: string
+                        example: user@example.com
+                      issue:
+                        type: string
+                        example: "Unable to login"
+                      appNumber:
+                        type: string
+                        example: "APP123456"
+                      priority:
+                        type: string
+                        example: "high"
+                      description:
+                        type: string
+                        example: "User is unable to login despite entering correct credentials."
+        '400':
+          description: Bad request. Missing required fields.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "All fields are required"
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "An error occurred while processing your request"
+

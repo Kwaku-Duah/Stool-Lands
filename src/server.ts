@@ -31,7 +31,7 @@ app.get('/hello', (req, res) => {
 
 app.use('/', rootRouter);
 app.get('/hi', (req, res) => {
-  res.send('This is the backend for a stool land');
+  res.send('This is the backend for a stool land, UPDATED');
 });
 
 

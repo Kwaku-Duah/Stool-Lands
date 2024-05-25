@@ -10,7 +10,7 @@ export const sendPasswordResetEmail = async (name: string,email: string, link: s
   const placeHolders = {
     name:name,
     email:email,
-    frontendURL: link
+    frontURL: link
   };
   const htmlMessage = template(placeHolders);
   return transporter.sendMail({

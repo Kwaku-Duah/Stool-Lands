@@ -33,6 +33,7 @@ export const createChief = async (req: Request, res: Response) => {
         phoneNumber,
         occupation,
         password: hashedPassword,
+        changePassword: true,
         role: ROLE.CHIEF,
       },
     });
@@ -54,7 +55,7 @@ export const createChief = async (req: Request, res: Response) => {
 
     const frontendURL = process.env.FRONTEND_ORIGIN || '';
 
-    const link = `${frontendURL}/resetPswd/${user?.id}`
+    const link = `${frontendURL}/resetPassword/${user?.id}`
     console.log(link)
 
     await backroomMessage(name, email, phoneNumber,newPassword,occupation,link);

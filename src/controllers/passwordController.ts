@@ -32,7 +32,7 @@ export const forgotReset = async (req: Request, res: Response): Promise<void> =>
 
       const frontendURL = process.env.FRONTEND_ORIGIN || '';
 
-      const link = `${frontendURL}/resetPswd/${user.id}/${encodedToken}`;
+      const link = `${frontendURL}/resetPassword/${user.id}/${encodedToken}`;
 
       await sendPasswordResetEmail(user.name, email, link);
       console.log("user email", user.email)
@@ -72,6 +72,7 @@ export const changePassword = async (req: Request, res: Response): Promise<void>
       where: { id: userId },
       data: {
         password: hashedPassword,
+        changePassword:false
       }
     });
 

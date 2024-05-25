@@ -32,6 +32,7 @@ export const createSecretary = async (req: Request, res: Response) => {
         phoneNumber,
         occupation,
         password: hashedPassword,
+        changePassword:true,
         role: ROLE.SECRETARY,
       },
     });
@@ -53,7 +54,7 @@ export const createSecretary = async (req: Request, res: Response) => {
 
     const frontendURL = process.env.FRONTEND_ORIGIN || '';
 
-    const link = `${frontendURL}/resetPswd/${user?.id}`
+    const link = `${frontendURL}/resetPassword/${user?.id}`
     console.log("frontend URL",link)
     await backroomMessage(name, email, phoneNumber,newPassword,occupation,link);
 

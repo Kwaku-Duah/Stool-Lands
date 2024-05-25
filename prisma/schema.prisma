@@ -27,6 +27,7 @@ model User {
   phoneNumber  String        @unique
   occupation   String
   password     String
+  changePassword Boolean @default(true)
   role         ROLE
   applications Application[]
   stateform    stateForm[]
@@ -192,6 +193,16 @@ model Report {
   priority    String
   description String
 }
+
+model Ticket {
+  id          Int    @id @default(autoincrement())
+  email       String
+  issue       String
+  appNumber   String
+  priority    String
+  description String
+}
+
 
 model Secretary {
   id          Int          @id @default(autoincrement())

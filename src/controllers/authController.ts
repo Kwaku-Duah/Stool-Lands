@@ -56,12 +56,13 @@ export const signup = async (req: Request, res: Response, next: NextFunction): P
         phoneNumber: phoneNumber,
         occupation: occupation,
         password: hashedPassword,
+        changePassword: false,
         role: ROLE.APPLICANT
       }
     });
 
     await applicantNotice(name, email, phoneNumber);
-    res.status(200).json({ message: 'Signup successful'});
+    res.status(200).json({ message: `Signup successful, welcome ${newUser.name}`});
 
   } catch (error) {
     let statusCode = 400;

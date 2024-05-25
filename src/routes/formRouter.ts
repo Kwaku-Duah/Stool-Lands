@@ -1,5 +1,5 @@
 import express from 'express';
-import { fillApplicationForm,getFormsCreatedByUser,createReport } from '../controllers/applicantFormController';
+import { fillApplicationForm,getFormsCreatedByUser,createTicket,createReport } from '../controllers/applicantFormController';
 import { createOrganizationForm } from '../controllers/orgApplication';
 import { jointApplicationForm } from '../controllers/jointForm';
 import { authMiddleware,applicantMiddleware } from '../middleWares/authMiddleware';
@@ -16,6 +16,11 @@ router.post('/org-apply',[authMiddleware,applicantMiddleware],upload.any(),creat
 
 // JOINT appliaction form
 router.post('/joint-apply',[authMiddleware,applicantMiddleware],upload.any(),jointApplicationForm)
+
+// make an enquiry
 router.post('/report',createReport)
+
+// raise an issue
+router.post('/issue',createTicket)
 
 export default router;
