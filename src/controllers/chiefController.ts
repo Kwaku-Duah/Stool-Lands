@@ -12,6 +12,7 @@ const generateChiefId = async (): Promise<string> => {
   return chiefId;
 };
 
+// Going to be used for subchief
 export const createChief = async (req: Request, res: Response) => {
   try {
     const { name, email, phoneNumber, occupation, newPassword, confirmPassword } = req.body;
@@ -39,6 +40,7 @@ export const createChief = async (req: Request, res: Response) => {
         role: ROLE.CHIEF,
       },
     });
+
 
     const chiefId = await generateChiefId();
 

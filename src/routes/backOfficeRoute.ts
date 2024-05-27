@@ -7,7 +7,7 @@ import { adminMiddleware, authMiddleware, secretaryMiddleware } from '../middleW
 
 const backRoute: Router = express.Router()
 backRoute.post('/secretary',[authMiddleware,adminMiddleware],createSecretary)
-backRoute.post('/inspector',[authMiddleware,adminMiddleware],createInspector)
+backRoute.post('/inspector',[authMiddleware,secretaryMiddleware],createInspector)
 backRoute.post('/chief',[authMiddleware,adminMiddleware],createChief)
 
 export default backRoute;
