@@ -8,7 +8,7 @@ import db from '../dbConfig/db'
 const generateChiefId = async (): Promise<string> => {
   const existingChiefCount = await db.chief.count();
   const chiefCount = existingChiefCount + 1;
-  const chiefId = `CHIEF-${chiefCount.toString().padStart(3, '0')}`;
+  const chiefId = `SUBCHIEF-${chiefCount.toString().padStart(3, '0')}`;
   return chiefId;
 };
 
@@ -26,6 +26,8 @@ export const createChief = async (req: Request, res: Response) => {
 
     const hashedPassword = hashSync(newPassword, 10);
 
+
+
     const newUser = await db.user.create({
       data: {
         name,
@@ -34,7 +36,7 @@ export const createChief = async (req: Request, res: Response) => {
         occupation,
         password: hashedPassword,
         changePassword: true,
-        role: ROLE.ADMIN,
+        role: ROLE.CHIEF,
       },
     });
 

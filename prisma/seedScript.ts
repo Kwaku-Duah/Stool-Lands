@@ -53,7 +53,7 @@ export async function seedScript() {
       email: email,
       phoneNumber: phoneNumber,
       password: hashedPassword,
-      occupation: "ADMINISTRATOR",
+      occupation: "CHIEF",
       changePassword:false,
       role: ROLE.ADMIN,
     }
