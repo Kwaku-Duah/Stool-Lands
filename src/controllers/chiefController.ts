@@ -34,7 +34,7 @@ export const createChief = async (req: Request, res: Response) => {
         occupation,
         password: hashedPassword,
         changePassword: true,
-        role: ROLE.CHIEF,
+        role: ROLE.ADMIN,
       },
     });
 

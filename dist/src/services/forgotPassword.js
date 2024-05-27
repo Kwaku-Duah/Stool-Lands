@@ -14,7 +14,7 @@ const sendPasswordResetEmail = async (name, email, link) => {
     const placeHolders = {
         name: name,
         email: email,
-        frontendURL: link
+        frontURL: link
     };
     const htmlMessage = template(placeHolders);
     return mailer_1.transporter.sendMail({

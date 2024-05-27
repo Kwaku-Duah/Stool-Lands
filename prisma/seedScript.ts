@@ -54,6 +54,7 @@ export async function seedScript() {
       phoneNumber: phoneNumber,
       password: hashedPassword,
       occupation: "ADMINISTRATOR",
+      changePassword:false,
       role: ROLE.ADMIN,
     }
   });

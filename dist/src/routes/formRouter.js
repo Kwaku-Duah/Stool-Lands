@@ -17,5 +17,8 @@ router.get('/applications', [authMiddleware_1.authMiddleware, authMiddleware_1.a
 router.post('/org-apply', [authMiddleware_1.authMiddleware, authMiddleware_1.applicantMiddleware], uploadMulter_1.default.any(), orgApplication_1.createOrganizationForm);
 // JOINT appliaction form
 router.post('/joint-apply', [authMiddleware_1.authMiddleware, authMiddleware_1.applicantMiddleware], uploadMulter_1.default.any(), jointForm_1.jointApplicationForm);
+// make an enquiry
 router.post('/report', applicantFormController_1.createReport);
+// raise an issue
+router.post('/issue', applicantFormController_1.createTicket);
 exports.default = router;

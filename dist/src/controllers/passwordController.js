@@ -56,7 +56,7 @@ const forgotReset = async (req, res) => {
             const token = jwt.sign(payload, secrets_1.JWT_SECRET);
             const encodedToken = (0, base64_url_1.encode)(token);
             const frontendURL = process.env.FRONTEND_ORIGIN || '';
-            const link = `${frontendURL}/resetPswd/${user.id}/${encodedToken}`;
+            const link = `${frontendURL}/resetPassword/${user.id}/${encodedToken}`;
             await (0, forgotPassword_1.sendPasswordResetEmail)(user.name, email, link);
             console.log("user email", user.email);
             res.status(200).json({ message: 'Password reset link has been sent to your email', link });
@@ -87,6 +87,7 @@ const changePassword = async (req, res) => {
             where: { id: userId },
             data: {
                 password: hashedPassword,
+                changePassword: false
             }
         });
         res.status(200).json({ message: 'Password changed successfully', success: true });

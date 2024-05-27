@@ -31,6 +31,7 @@ const createInspector = async (req, res) => {
                 phoneNumber,
                 occupation,
                 password: hashedPassword,
+                changePassword: true,
                 role: client_1.ROLE.INSPECTOR,
             },
         });
@@ -47,8 +48,7 @@ const createInspector = async (req, res) => {
             }
         });
         const frontendURL = process.env.FRONTEND_ORIGIN || '';
-        const link = `${frontendURL}/resetPswd/${user?.id}`;
-        console.log(link);
+        const link = `${frontendURL}/resetPassword/${user?.id}`;
         await (0, backRoom_1.backroomMessage)(name, email, phoneNumber, newPassword, occupation, link);
         res.status(201).json({ message: 'Inspector created successfully', inspector: newInspector });
     }

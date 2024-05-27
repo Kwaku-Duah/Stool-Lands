@@ -72,11 +72,12 @@ const signup = async (req, res, next) => {
                 phoneNumber: phoneNumber,
                 occupation: occupation,
                 password: hashedPassword,
+                changePassword: false,
                 role: client_1.ROLE.APPLICANT
             }
         });
         await (0, applicantMail_1.applicantNotice)(name, email, phoneNumber);
-        res.status(200).json({ message: 'Signup successful' });
+        res.status(200).json({ message: `Signup successful, welcome ${newUser.name}` });
     }
     catch (error) {
         let statusCode = 400;

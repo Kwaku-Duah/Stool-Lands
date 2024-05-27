@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createReport = exports.getFormsCreatedByUser = exports.fillApplicationForm = void 0;
+exports.createReport = exports.createTicket = exports.getFormsCreatedByUser = exports.fillApplicationForm = void 0;
 const uuid_1 = require("uuid");
 const client_s3_1 = require("@aws-sdk/client-s3");
 const dotenv_1 = require("dotenv");
@@ -176,6 +176,30 @@ const getFormsCreatedByUser = async (req, res) => {
     }
 };
 exports.getFormsCreatedByUser = getFormsCreatedByUser;
+const createTicket = async (req, res) => {
+    try {
+        const { email, issue, appNumber, priority, description } = req.body;
+        if (!email || !issue || !appNumber || !priority || !description) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+        const ticket = await db_1.default.ticket.create({
+            data: {
+                email,
+                issue,
+                appNumber,
+                priority,
+                description
+            }
+        });
+        //  New to send this issue to the secretary
+        res.status(201).json({ message: 'Your issue has been successfully raised', ticket });
+    }
+    catch (error) {
+        console.error('Error occurred while creating ticket:', error);
+        res.status(500).json({ error: 'An error occurred while processing your request' });
+    }
+};
+exports.createTicket = createTicket;
 const createReport = async (req, res) => {
     try {
         const { email, issue, priority, description } = req.body;

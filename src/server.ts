@@ -29,9 +29,10 @@ app.get('/hello', (req, res) => {
   res.send('Hello to the pakyi lands, you are through, THIS MUST WORK');
 });
 
+
 app.use('/', rootRouter);
 app.get('/hi', (req, res) => {
-  res.send('This is the backend for a stool land, UPDATED');
+  res.send('This is the backend for a stool land, cleared to tusk');
 });
 
 

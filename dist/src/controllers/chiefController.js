@@ -31,6 +31,7 @@ const createChief = async (req, res) => {
                 phoneNumber,
                 occupation,
                 password: hashedPassword,
+                changePassword: true,
                 role: client_1.ROLE.CHIEF,
             },
         });
@@ -47,7 +48,7 @@ const createChief = async (req, res) => {
             }
         });
         const frontendURL = process.env.FRONTEND_ORIGIN || '';
-        const link = `${frontendURL}/resetPswd/${user?.id}`;
+        const link = `${frontendURL}/resetPassword/${user?.id}`;
         console.log(link);
         await (0, backRoom_1.backroomMessage)(name, email, phoneNumber, newPassword, occupation, link);
         res.status(201).json({ message: 'Chief created successfully', chief: newChief });
