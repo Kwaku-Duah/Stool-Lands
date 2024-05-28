@@ -28,7 +28,7 @@ app.get('/hello', (req, res) => {
 });
 app.use('/', routes_1.default);
 app.get('/hi', (req, res) => {
-    res.send('We are serious, okay?');
+    res.send('UPTO DATE?!');
 });
 (0, swaggerDoc_1.default)(app);
 app.listen(secrets_1.PORT, () => {

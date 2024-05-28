@@ -3,6 +3,8 @@ import { hashSync } from 'bcrypt';
 import {  ROLE } from '@prisma/client';
 import { backroomMessage } from '../services/backRoom';
 import db from '../dbConfig/db'
+import { generateTemporaryPassword } from '../utils/passworGenerator';
+import { hashPassword } from '../utils/hashPassword';
 
 const generateInspectorId = async (): Promise<string> => {
   const existingInspectorCount = await db.inspector.count();
@@ -13,28 +15,30 @@ const generateInspectorId = async (): Promise<string> => {
 
 export const createInspector = async (req: Request, res: Response) => {
   try {
-    const { name, email, phoneNumber, occupation, newPassword, confirmPassword } = req.body;
+    const { name, email, phoneNumber } = req.body;
 
-    if (newPassword !== confirmPassword) {
-      return res.status(400).json({ error: 'New password and confirm password do not match' });
-    }
-
-    if (newPassword.length < 8) {
-      return res.status(400).json({ error: 'Password must be at least 8 characters long' });
-    }
-
-    const hashedPassword = hashSync(newPassword, 10);
+    const temporaryPassword = generateTemporaryPassword()
 
     const newUser = await db.user.create({
       data: {
         name,
         email,
         phoneNumber,
-        occupation,
-        password: hashedPassword,
+        occupation: 'INSPECTOR',
+        password: temporaryPassword,
         changePassword: true,
         role: ROLE.INSPECTOR,
       },
+    });
+
+
+    const hashedPassword = await hashPassword(temporaryPassword);
+
+    await db.user.update({
+      where: { id: newUser.id },
+      data: {
+        password: hashedPassword
+      }
     });
 
     const inspectorId = await generateInspectorId();
@@ -54,9 +58,9 @@ export const createInspector = async (req: Request, res: Response) => {
 
     const frontendURL = process.env.FRONTEND_ORIGIN || '';
 
-    const link = `${frontendURL}/resetPassword/${user?.id}`
+    const link = `${frontendURL}/${user?.id}`
  
-    await backroomMessage(name, email, phoneNumber,newPassword,occupation,link);
+    await backroomMessage(name, email, phoneNumber,temporaryPassword,user!.occupation,link);
 
     res.status(201).json({ message: 'Inspector created successfully', inspector: newInspector });
   } catch (error) {

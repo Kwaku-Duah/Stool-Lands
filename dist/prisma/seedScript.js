@@ -48,6 +48,7 @@ async function seedScript() {
             password: hashedPassword,
             occupation: "CHIEF",
             changePassword: false,
+            activeStatus: true,
             role: client_1.ROLE.ADMIN,
         }
     });

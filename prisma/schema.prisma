@@ -34,7 +34,12 @@ model User {
   transaction  Transaction[]
 
   OrganizationForm OrganizationForm[]
+  activeStatus Boolean @default(true)
 }
+
+
+
+
 
 model payableService {
   id          Int      @id @default(autoincrement())

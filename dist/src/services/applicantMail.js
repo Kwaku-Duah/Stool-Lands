@@ -21,7 +21,6 @@ const applicantNotice = async (name, email, phoneNumber) => {
         };
         const htmlMessage = template(placeHolders);
         if (email) {
-            // Send email
             await mailer_1.transporter.sendMail({
                 from: secrets_1.ADMIN_MAIL,
                 to: email,

@@ -107,7 +107,6 @@ exports.secretaryMiddleware = secretaryMiddleware;
 const roleMiddleware = (req, res, next) => {
     try {
         const { role } = req.user;
-        console.log("request", req);
         if (role === 'ADMIN' || role === 'SECRETARY') {
             next();
         }

@@ -10,6 +10,6 @@ const chiefController_1 = require("../controllers/chiefController");
 const authMiddleware_1 = require("../middleWares/authMiddleware");
 const backRoute = express_1.default.Router();
 backRoute.post('/secretary', [authMiddleware_1.authMiddleware, authMiddleware_1.adminMiddleware], secretaryController_1.createSecretary);
-backRoute.post('/inspector', [authMiddleware_1.authMiddleware, authMiddleware_1.secretaryMiddleware], inspectorController_1.createInspector);
+backRoute.post('/inspector', [authMiddleware_1.authMiddleware, authMiddleware_1.roleMiddleware], inspectorController_1.createInspector);
 backRoute.post('/chief', [authMiddleware_1.authMiddleware, authMiddleware_1.adminMiddleware], chiefController_1.createChief);
 exports.default = backRoute;

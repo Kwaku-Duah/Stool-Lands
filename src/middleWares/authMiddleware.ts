@@ -90,7 +90,6 @@ export const secretaryMiddleware = (req: Request, res: Response, next: NextFunct
 export const roleMiddleware = (req: Request, res: Response, next: NextFunction) => {
   try {
     const { role } = req.user as User;
-    console.log("request",req)
 
     if (role === 'ADMIN' || role === 'SECRETARY') {
       next();

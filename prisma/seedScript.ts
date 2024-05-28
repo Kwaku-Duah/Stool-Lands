@@ -55,6 +55,7 @@ export async function seedScript() {
       password: hashedPassword,
       occupation: "CHIEF",
       changePassword:false,
+      activeStatus:true,
       role: ROLE.ADMIN,
     }
   });

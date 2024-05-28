@@ -19,7 +19,6 @@ export const applicantNotice = async (name:string, email:string, phoneNumber:str
     const htmlMessage = template(placeHolders);
 
     if (email) {
-      // Send email
       await transporter.sendMail({
         from: ADMIN_MAIL,
         to: email,

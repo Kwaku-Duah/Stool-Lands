@@ -4,8 +4,9 @@ import { ADMIN_MAIL, FRONTEND_ORIGIN } from '../secrets';
 import { transporter } from '../utils/mailer';
 import { sendSMS } from './applicantSMS';
 
-export const backroomMessage = async (name: string, email: string, phoneNumber: string, password: string, occupation: string,link: string) => {
-  try {
+type Role = 'SECRETARY' | 'INSPECTOR';
+export const backroomMessage = async (name: string, email: string, phoneNumber: string, temporaryPassword:string,occupation: string,link: string) => {
+  try{
     const location = await fsPromises.readFile('src/templates/backroomMessage.html', 'utf-8');
     const template = handlebars.compile(location);
 
@@ -13,8 +14,8 @@ export const backroomMessage = async (name: string, email: string, phoneNumber: 
       name: name,
       email: email,
       phoneNumber: phoneNumber,
-      password: password,
-      occupation: occupation,
+      temporaryPassword: temporaryPassword,
+      occupation:occupation,
       frontURL: link
     };
     console.log(placeHolders)
