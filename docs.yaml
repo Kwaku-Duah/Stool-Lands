@@ -1644,3 +1644,69 @@ paths:
                     type: string
                     example: "An error occurred while processing your request"
 
+
+/new/all-forms:
+  get:
+    summary: Get all forms
+    description: Fetches all application, organization, and state forms.
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: Successfully fetched forms
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                forms:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      userId:
+                        type: string
+                      documents:
+                        type: array
+                        items:
+                          type: object
+                      serviceId:
+                        type: string
+      '401':
+        description: Unauthorized - No token provided or invalid token
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: No token provided
+      '403':
+        description: Forbidden - Insufficient privileges
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: Insufficient Privileges
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: Internal Server Error
+
+
+

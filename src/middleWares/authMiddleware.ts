@@ -84,3 +84,21 @@ export const secretaryMiddleware = (req: Request, res: Response, next: NextFunct
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+
+
+export const roleMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { role } = req.user as User;
+    console.log("request",req)
+
+    if (role === 'ADMIN' || role === 'SECRETARY') {
+      next();
+    } else {
+      return res.status(403).json({ error: 'Insufficient Privileges' });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+

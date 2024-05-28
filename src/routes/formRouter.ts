@@ -1,15 +1,21 @@
 import express from 'express';
-import { fillApplicationForm,getFormsCreatedByUser,createTicket,createReport } from '../controllers/applicantFormController';
+import { fillApplicationForm,getFormsCreatedByUser,getAllForms,createTicket,createReport } from '../controllers/applicantFormController';
 import { createOrganizationForm } from '../controllers/orgApplication';
 import { jointApplicationForm } from '../controllers/jointForm';
-import { authMiddleware,applicantMiddleware } from '../middleWares/authMiddleware';
+import { authMiddleware,applicantMiddleware, roleMiddleware} from '../middleWares/authMiddleware';
 import upload from '../middleWares/uploadMulter'
+
 
 const router = express.Router();
 
 // Route to handle filling the application form with multer middleware
 router.post('/apply', [authMiddleware,applicantMiddleware],upload.any(),fillApplicationForm);
 router.get('/applications',[authMiddleware,applicantMiddleware],getFormsCreatedByUser)
+
+
+// route for admin/secretary
+router.get('/all-forms',[authMiddleware,roleMiddleware],getAllForms)
+
 
 // organization
 router.post('/org-apply',[authMiddleware,applicantMiddleware],upload.any(),createOrganizationForm)
