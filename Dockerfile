@@ -12,7 +12,7 @@ COPY prisma/ ./prisma
 
 RUN yarn install
 RUN yarn prisma:generate
-RUN yarn build
+
 
 
 # Copy the rest of the application source code to the working directory
