@@ -13,6 +13,8 @@ const router = express_1.default.Router();
 // Route to handle filling the application form with multer middleware
 router.post('/apply', [authMiddleware_1.authMiddleware, authMiddleware_1.applicantMiddleware], uploadMulter_1.default.any(), applicantFormController_1.fillApplicationForm);
 router.get('/applications', [authMiddleware_1.authMiddleware, authMiddleware_1.applicantMiddleware], applicantFormController_1.getFormsCreatedByUser);
+// route for admin/secretary
+router.get('/all-forms', [authMiddleware_1.authMiddleware, authMiddleware_1.roleMiddleware], applicantFormController_1.getAllForms);
 // organization
 router.post('/org-apply', [authMiddleware_1.authMiddleware, authMiddleware_1.applicantMiddleware], uploadMulter_1.default.any(), orgApplication_1.createOrganizationForm);
 // JOINT appliaction form

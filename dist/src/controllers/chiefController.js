@@ -11,9 +11,10 @@ const db_1 = __importDefault(require("../dbConfig/db"));
 const generateChiefId = async () => {
     const existingChiefCount = await db_1.default.chief.count();
     const chiefCount = existingChiefCount + 1;
-    const chiefId = `CHIEF-${chiefCount.toString().padStart(3, '0')}`;
+    const chiefId = `SUBCHIEF-${chiefCount.toString().padStart(3, '0')}`;
     return chiefId;
 };
+// Going to be used for subchief
 const createChief = async (req, res) => {
     try {
         const { name, email, phoneNumber, occupation, newPassword, confirmPassword } = req.body;

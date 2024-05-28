@@ -46,7 +46,7 @@ async function seedScript() {
             email: email,
             phoneNumber: phoneNumber,
             password: hashedPassword,
-            occupation: "ADMINISTRATOR",
+            occupation: "CHIEF",
             changePassword: false,
             role: client_1.ROLE.ADMIN,
         }
