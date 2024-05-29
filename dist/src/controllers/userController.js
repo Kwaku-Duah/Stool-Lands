@@ -32,19 +32,7 @@ const getAllForms = async (req, res) => {
         const organizationForms = await db_1.default.organizationForm.findMany({
             include: { documents: true }
         });
-        const stateForms = await db_1.default.stateForm.findMany();
-        const formsWithServiceId = await Promise.all(stateForms.map(async (stateForm) => {
-            const transaction = await db_1.default.transaction.findFirst({
-                where: { clientReference: stateForm.clientReference },
-                select: { serviceId: true }
-            });
-            const serviceId = transaction?.serviceId;
-            return {
-                ...stateForm,
-                serviceId: serviceId
-            };
-        }));
-        const forms = [...applicationForms, ...organizationForms, ...formsWithServiceId];
+        const forms = [...applicationForms, ...organizationForms];
         res.status(200).json({ success: true, forms });
     }
     catch (error) {
