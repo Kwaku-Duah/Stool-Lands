@@ -11,7 +11,6 @@ COPY prisma/ ./prisma
 # Install dependencies
 
 RUN yarn install
-RUN yarn build
 RUN yarn prisma:generate
 
 
