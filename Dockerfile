@@ -9,8 +9,8 @@ COPY package.json yarn.lock ./
 
 COPY prisma/ ./prisma
 # Install dependencies
-
 RUN yarn install
+
 RUN yarn prisma:generate
 
 

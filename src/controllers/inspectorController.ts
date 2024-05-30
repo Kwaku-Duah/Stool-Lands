@@ -58,7 +58,8 @@ export const createInspector = async (req: Request, res: Response) => {
 
     const frontendURL = process.env.FRONTEND_ORIGIN || '';
 
-    const link = `${frontendURL}/${user?.id}`
+    const link = `${frontendURL}/login`
+    console.log(link)
  
     await backroomMessage(name, email, phoneNumber,temporaryPassword,user!.occupation,link);
 

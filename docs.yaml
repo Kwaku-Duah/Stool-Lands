@@ -411,15 +411,6 @@ paths:
               phoneNumber:
                 type: string
                 description: The phone number of the secretary.
-              occupation:
-                type: string
-                description: The occupation of the secretary.
-              newPassword:
-                type: string
-                description: The new password for the secretary account.
-              confirmPassword:
-                type: string
-                description: The confirmation of the new password.
     responses:
       '201':
         description: Secretary created successfully
@@ -490,15 +481,6 @@ paths:
               phoneNumber:
                 type: string
                 description: The phone number of the inspector.
-              occupation:
-                type: string
-                description: The occupation of the inspector.
-              newPassword:
-                type: string
-                description: The new password for the inspector's account.
-              confirmPassword:
-                type: string
-                description: Confirmation of the new password.
     responses:
       '201':
         description: Inspector created successfully
@@ -569,15 +551,6 @@ paths:
               phoneNumber:
                 type: string
                 description: The phone number of the chief.
-              occupation:
-                type: string
-                description: The occupation of the chief.
-              newPassword:
-                type: string
-                description: The new password for the chief's account.
-              confirmPassword:
-                type: string
-                description: Confirmation of the new password.
     responses:
       '201':
         description: Chief created successfully

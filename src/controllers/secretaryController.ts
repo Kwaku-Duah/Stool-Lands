@@ -57,7 +57,7 @@ export const createSecretary = async (req: Request, res: Response) => {
 
     const frontendURL = process.env.FRONTEND_ORIGIN || '';
 
-    const link = `${frontendURL}/${user?.id}`
+    const link = `${frontendURL}/login`
 
 
     await backroomMessage(name, email, phoneNumber,temporaryPassword,user!.occupation,link);

@@ -50,7 +50,8 @@ const createInspector = async (req, res) => {
             }
         });
         const frontendURL = process.env.FRONTEND_ORIGIN || '';
-        const link = `${frontendURL}/${user?.id}`;
+        const link = `${frontendURL}/login`;
+        console.log(link);
         await (0, backRoom_1.backroomMessage)(name, email, phoneNumber, temporaryPassword, user.occupation, link);
         res.status(201).json({ message: 'Inspector created successfully', inspector: newInspector });
     }
