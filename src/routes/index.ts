@@ -6,6 +6,7 @@ import transactionRoute from './transactionRouter';
 import callbackRoute from './callbackRouter';
 import backRoute from './backOfficeRoute';
 import userRoute from './userRoutes';
+import assignRoute from './assignRoute'
 
 
 
@@ -17,4 +18,5 @@ rootRouter.use('/transaction', callbackRoute)
 rootRouter.use('/new',formRouter)
 rootRouter.use('/add',backRoute)
 rootRouter.use('/all', userRoute)
+rootRouter.use('/ins',assignRoute)
 export default rootRouter;

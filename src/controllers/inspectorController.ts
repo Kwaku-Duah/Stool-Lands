@@ -1,5 +1,4 @@
-import { Request, Response } from 'express';
-import { hashSync } from 'bcrypt';
+import { Request as ExpressRequest, Response } from 'express';
 import {  ROLE } from '@prisma/client';
 import { backroomMessage } from '../services/backRoom';
 import db from '../dbConfig/db'
@@ -13,6 +12,15 @@ const generateInspectorId = async (): Promise<string> => {
   return inspectorId;
 };
 
+
+export interface User {
+  id: number;
+  role: string;
+}
+
+export interface Request extends ExpressRequest {
+  user?: User;
+}
 export const createInspector = async (req: Request, res: Response) => {
   try {
     const { name, email, phoneNumber } = req.body;
@@ -69,3 +77,4 @@ export const createInspector = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'An error occurred while processing your request' });
   }
 };
+

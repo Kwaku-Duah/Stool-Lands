@@ -1758,3 +1758,408 @@ paths:
 
 
 
+
+
+
+
+/all/user-del:
+  post:
+    summary: Delete a user
+    description: Deletes a user by setting their details to null and activeStatus to false. Cannot delete admin or secretary users.
+    tags:
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userId:
+                type: integer
+                description: The ID of the user to delete
+                example: 123
+    responses:
+      '200':
+        description: User nullified successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: User nullified successfully
+                nullifiedUser:
+                  type: object
+                  description: Details of the nullified user
+                  properties:
+                    id:
+                      type: integer
+                      example: 123
+                    name:
+                      type: string
+                      example: John Doe
+                    email:
+                      type: string
+                      example: johndoe@example.com
+                    phoneNumber:
+                      type: string
+                      example: '1234567890'
+                    occupation:
+                      type: string
+                      example: Developer
+                    role:
+                      type: string
+                      example: null
+                    activeStatus:
+                      type: boolean
+                      example: false
+      '400':
+        description: User ID is required
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  example: User ID is required
+      '403':
+        description: Cannot delete an admin or secretary user
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  example: Cannot delete an admin or secretary user
+      '404':
+        description: User not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  example: User not found
+      '500':
+        description: An error occurred while processing your request
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  example: An error occurred while processing your request
+
+
+/all/user-deactivate:
+  post:
+    summary: Deactivate a user
+    description: Deactivates a user by setting their activeStatus to false. Cannot deactivate admin or secretary users.
+    tags:
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userId:
+                type: integer
+                description: The ID of the user to deactivate
+                example: 123
+    responses:
+      '200':
+        description: User deactivated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: User deactivated successfully
+                user:
+                  type: object
+                  description: Details of the deactivated user
+                  properties:
+                    id:
+                      type: integer
+                      example: 123
+                    name:
+                      type: string
+                      example: John Doe
+                    email:
+                      type: string
+                      example: johndoe@example.com
+                    phoneNumber:
+                      type: string
+                      example: '1234567890'
+                    occupation:
+                      type: string
+                      example: Developer
+                    role:
+                      type: string
+                      example: USER
+                    activeStatus:
+                      type: boolean
+                      example: false
+      '400':
+        description: Authenticated user required
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  example: Authenticated user required
+      '403':
+        description: Cannot deactivate an admin or secretary user
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  example: Cannot delete an admin or secretary user
+      '404':
+        description: User not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  example: User not found
+      '500':
+        description: An error occurred while processing your request
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  example: An error occurred while processing your request
+
+
+
+
+/ins/assign:
+  post:
+    summary: Assign an inspector to a form
+    description: Assigns an inspector to a form (either an Application or OrganizationForm) based on the provided uniqueFormID. Ensures that the user is authenticated and is a secretary, and that the form and inspector exist.
+    tags:
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              uniqueFormID:
+                type: string
+                example: form123
+              email:
+                type: string
+                example: inspector@example.com
+    responses:
+      '200':
+        description: Form assigned successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: Form assigned successfully
+                invitation:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    assignmentId:
+                      type: string
+                      example: form123
+                    inspectors:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          inspectorId:
+                            type: string
+                            example: inspector123
+                assignedForm:
+                  type: object
+                  properties:
+                    uniqueFormID:
+                      type: string
+                      example: form123
+                    name:
+                      type: string
+                      example: Example Form
+      '401':
+        description: User not authenticated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  example: User not authenticated
+      '403':
+        description: User is not an inspector
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  example: User is not an inspector
+      '404':
+        description: User, Secretary, or Form not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  example: User, Secretary, or Form not found
+      '500':
+        description: An error occurred while processing your request
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  example: An error occurred while processing your request
+
+/ins/all:
+  get:
+    summary: Get all forms assigned to the authenticated inspector
+    description: Retrieves all forms (either Application or OrganizationForm) assigned to the currently authenticated inspector based on their invitations.
+  
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: Forms retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                forms:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      uniqueFormID:
+                        type: string
+                        example: form123
+                      name:
+                        type: string
+                        example: Example Form
+      '401':
+        description: User not authenticated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  example: User not authenticated
+      '404':
+        description: User or Inspector not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  example: User or Inspector not found
+      '500':
+        description: An error occurred while processing your request
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  example: An error occurred while processing your request

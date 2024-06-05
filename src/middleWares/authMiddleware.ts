@@ -101,3 +101,16 @@ export const roleMiddleware = (req: Request, res: Response, next: NextFunction) 
   }
 };
 
+export const inspectorMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { role } = req.user as User;
+
+    if (role === 'INSPECTOR') {
+      next();
+    } else {
+      return res.status(403).json({ error: 'Insufficient privileges' });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};

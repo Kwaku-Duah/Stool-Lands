@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider          = "postgresql"
+  provider = "postgresql"
 
   url               = env("DATABASE_URL")
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
@@ -21,25 +21,21 @@ enum ROLE {
 }
 
 model User {
-  id           Int           @id @default(autoincrement())
-  name         String
-  email        String?       @unique
-  phoneNumber  String        @unique
-  occupation   String
-  password     String
-  changePassword Boolean @default(true)
-  role         ROLE
-  applications Application[]
-  stateform    stateForm[]
-  transaction  Transaction[]
+  id             Int           @id @default(autoincrement())
+  name           String
+  email          String?       @unique
+  phoneNumber    String        @unique
+  occupation     String
+  password       String
+  changePassword Boolean       @default(true)
+  role           ROLE
+  applications   Application[]
+  stateform      stateForm[]
+  transaction    Transaction[]
 
   OrganizationForm OrganizationForm[]
-  activeStatus Boolean @default(true)
+  activeStatus     Boolean            @default(true)
 }
-
-
-
-
 
 model payableService {
   id          Int      @id @default(autoincrement())
@@ -52,24 +48,24 @@ model payableService {
 }
 
 model Transaction {
-  id                 Int      @id @default(autoincrement())
-  status             String
-  clientReference    String   @unique
-  serviceId          String
-  description        String
-  createdAt          DateTime
-  customerName       String
-  User               User     @relation(fields: [userId], references: [id])
-  userId             Int
-  paymentProvider    String
-  phoneNumber        String
-  isPaymentCompleted Boolean
-  isServiceCompleted Boolean
-  amount             Float
-  MobileMoneyNumber       String?
-  PaymentType             String?
-  Channel                 String?
-  ProviderDescription     String?
+  id                  Int      @id @default(autoincrement())
+  status              String
+  clientReference     String   @unique
+  serviceId           String
+  description         String
+  createdAt           DateTime
+  customerName        String
+  User                User     @relation(fields: [userId], references: [id])
+  userId              Int
+  paymentProvider     String
+  phoneNumber         String
+  isPaymentCompleted  Boolean
+  isServiceCompleted  Boolean
+  amount              Float
+  MobileMoneyNumber   String?
+  PaymentType         String?
+  Channel             String?
+  ProviderDescription String?
 }
 
 // updating stuff
@@ -110,7 +106,7 @@ model Application {
   createdAt              DateTime          @default(now())
   User                   User              @relation(fields: [userId], references: [id])
   userId                 Int
-  formStatus             FormState        @default(NEW)
+  formStatus             FormState         @default(NEW)
 }
 
 model OrganizationForm {
@@ -136,19 +132,19 @@ model OrganizationForm {
   createdAt              DateTime          @default(now())
   User                   User              @relation(fields: [userId], references: [id])
   userId                 Int
-  formStatus             FormState       @default(NEW)
+  formStatus             FormState         @default(NEW)
 }
 
 model File {
-  id            Int          @id @default(autoincrement())
-  application   Application  @relation(fields: [applicationId], references: [id])
+  id            Int         @id @default(autoincrement())
+  application   Application @relation(fields: [applicationId], references: [id])
   applicationId Int
-  url         String
+  url           String
 }
 
 model orgDocument {
   id                 Int              @id @default(autoincrement())
-  url              String
+  url                String
   OrganizationForm   OrganizationForm @relation(fields: [organizationFormId], references: [id])
   organizationFormId Int
 }
@@ -183,7 +179,6 @@ enum FormState {
   FILLED
 }
 
-
 enum FormStatus {
   USED
   UNUSED
@@ -208,7 +203,6 @@ model Ticket {
   description String
 }
 
-
 model Secretary {
   id          Int          @id @default(autoincrement())
   email       String       @unique
@@ -224,15 +218,20 @@ model Inspector {
 }
 
 model Assignment {
-  id           Int       @id @default(autoincrement())
-  uniqueFormId String    @unique
+  id           Int          @id @default(autoincrement())
+  uniqueFormID String?      @unique
   secretaryId  String
-  secretary    Secretary @relation(fields: [secretaryId], references: [secretaryId])
+  isAssigned   Boolean      @default(false)
+  secretary    Secretary    @relation(fields: [secretaryId], references: [secretaryId])
+  invitations  Invitation[]
+
 }
 
 model Invitation {
-  id         Int         @id @default(autoincrement())
-  inspectors Inspector[]
+  id           Int         @id @default(autoincrement())
+  inspectors   Inspector[]
+  Assignment   Assignment? @relation(fields: [assignmentId], references: [uniqueFormID])
+  assignmentId String?
 }
 
 model Chief {
