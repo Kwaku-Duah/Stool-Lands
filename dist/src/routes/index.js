@@ -20,5 +20,5 @@ rootRouter.use('/transaction', callbackRouter_1.default);
 rootRouter.use('/new', formRouter_1.default);
 rootRouter.use('/add', backOfficeRoute_1.default);
 rootRouter.use('/all', userRoutes_1.default);
-rootRouter.use('/assign', assignRoute_1.default);
+rootRouter.use('/ins', assignRoute_1.default);
 exports.default = rootRouter;

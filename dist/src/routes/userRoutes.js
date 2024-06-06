@@ -7,4 +7,6 @@ const userRoute = (0, express_1.Router)();
 userRoute.get('/users', [authMiddleware_1.authMiddleware, authMiddleware_1.roleMiddleware], userController_1.allUsers);
 // route for admin/secretary
 userRoute.get('/forms', [authMiddleware_1.authMiddleware, authMiddleware_1.roleMiddleware], userController_1.getAllForms);
+userRoute.post('/user-deactivate', [authMiddleware_1.authMiddleware, authMiddleware_1.roleMiddleware], userController_1.userDeactivate);
+userRoute.post('/user-del', [authMiddleware_1.authMiddleware, authMiddleware_1.roleMiddleware], userController_1.deleteUser);
 exports.default = userRoute;

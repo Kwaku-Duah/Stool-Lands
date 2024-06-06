@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.assignInspector = void 0;
+exports.inspectorAssign = exports.assignInspector = void 0;
 const db_1 = __importDefault(require("../dbConfig/db"));
 const assignInspector = async (req, res) => {
     const { uniqueFormID, email } = req.body;
@@ -32,30 +32,33 @@ const assignInspector = async (req, res) => {
         if (!inspector) {
             return res.status(403).json({ success: false, message: 'User is not an inspector' });
         }
-        let assigned = await db_1.default.application.findUnique({
-            where: { uniqueFormID },
-        }) || await db_1.default.organizationForm.findUnique({
+        // Check if the uniqueFormID exists in either Application or OrganizationForm
+        const assignedApplication = await db_1.default.application.findUnique({
             where: { uniqueFormID },
         });
-        if (!assigned) {
+        const assignedOrganizationForm = await db_1.default.organizationForm.findUnique({
+            where: { uniqueFormID },
+        });
+        if (!assignedApplication && !assignedOrganizationForm) {
             return res.status(404).json({ success: false, message: 'Form not found' });
         }
         const createdAssignment = await db_1.default.assignment.create({
             data: {
                 uniqueFormID,
-                secretaryId: secretaryId,
+                secretaryId,
                 isAssigned: true,
             },
         });
         const invitation = await db_1.default.invitation.create({
             data: {
-                assignmentId: createdAssignment.id,
+                assignmentId: createdAssignment.uniqueFormID,
                 inspectors: {
                     connect: { inspectorId: inspector.inspectorId },
                 },
             },
         });
-        return res.status(200).json({ success: true, message: 'Form assigned successfully', invitation });
+        const assignedForm = assignedApplication || assignedOrganizationForm;
+        return res.status(200).json({ success: true, message: 'Form assigned successfully', invitation, assignedForm });
     }
     catch (error) {
         console.error('Error occurred while assigning form:', error);
@@ -63,3 +66,59 @@ const assignInspector = async (req, res) => {
     }
 };
 exports.assignInspector = assignInspector;
+const inspectorAssign = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
+        const user = await db_1.default.user.findUnique({
+            where: { id: userId },
+        });
+        if (!user || !user.email) {
+            return res.status(404).json({ success: false, message: 'User not found or email is missing' });
+        }
+        const inspector = await db_1.default.inspector.findUnique({
+            where: { email: user.email },
+        });
+        if (!inspector) {
+            return res.status(404).json({ success: false, message: 'Inspector not found' });
+        }
+        const invitations = await db_1.default.invitation.findMany({
+            where: {
+                inspectors: {
+                    some: {
+                        inspectorId: inspector.inspectorId,
+                    },
+                },
+            },
+            include: {
+                Assignment: true,
+            },
+        });
+        const forms = [];
+        for (const invitation of invitations) {
+            const assignmentId = invitation.Assignment?.uniqueFormID;
+            if (assignmentId) {
+                const applicationForm = await db_1.default.application.findUnique({
+                    where: { uniqueFormID: assignmentId },
+                });
+                const organizationForm = await db_1.default.organizationForm.findUnique({
+                    where: { uniqueFormID: assignmentId },
+                });
+                if (applicationForm) {
+                    forms.push(applicationForm);
+                }
+                if (organizationForm) {
+                    forms.push(organizationForm);
+                }
+            }
+        }
+        return res.status(200).json({ success: true, forms });
+    }
+    catch (error) {
+        console.error('Error occurred while fetching inspector assignments:', error);
+        return res.status(500).json({ success: false, message: 'An error occurred while processing your request' });
+    }
+};
+exports.inspectorAssign = inspectorAssign;
