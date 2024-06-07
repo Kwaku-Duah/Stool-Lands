@@ -10,5 +10,5 @@ userRoute.get('/forms',[authMiddleware,roleMiddleware],getAllForms)
 
 userRoute.post('/user-deactivate',[authMiddleware,roleMiddleware], userDeactivate)
 userRoute.post('/user-del',[authMiddleware,roleMiddleware],deleteUser)
-userRoute.get("/:userid", specificForms)
+userRoute.get("/:userid", [authMiddleware,roleMiddleware],specificForms)
 export default userRoute;
