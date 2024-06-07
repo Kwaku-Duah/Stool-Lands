@@ -57,6 +57,40 @@ export const getAllForms = async (req: Request, res: Response) => {
 };
 
 
+
+
+
+export const specificForms = async (req: Request, res: Response) => {
+  try {
+    const userId = parseInt(req.params.userid, 10);
+    console.log(userId)
+
+
+    const applicationForms = await db.application.findMany({
+      where: { userId },
+      include: { documents: true }
+    });
+
+    const organizationForms = await db.organizationForm.findMany({
+      where: { userId },
+      include: { documents: true }
+    });
+
+    const forms = [...applicationForms, ...organizationForms];
+
+    res.status(200).json({ success: true, forms });
+  } catch (error: any) {
+    console.error('Error occurred while fetching forms:', error);
+    res.status(500).json({ success: false, error: 'An error occurred while processing your request' });
+  }
+};
+
+
+
+
+
+
+
 export const userDeactivate = async (req: Request, res: Response) => {
   try {
     const { userId } = req.body;

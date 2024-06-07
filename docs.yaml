@@ -1754,8 +1754,73 @@ paths:
                 error:
                   type: string
                   example: An error occurred while fetching users
-
-
+/all/{userid}:
+  get:
+    summary: Get specific forms for a user
+    parameters:
+      - in: path
+        name: userid
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: The ID of the user
+    security:
+      - Admin: []
+      - Secretary: []
+    responses:
+      '200':
+        description: Successful operation
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                forms:
+                  type: array
+                  items:
+                    # Define your schema for forms here
+      '400':
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                error:
+                  type: string
+                  example: User ID must be a number
+      '401':
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                error:
+                  type: string
+                  example: Unauthorized access
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                error:
+                  type: string
+                  example: An error occurred while processing your request
 
 
 

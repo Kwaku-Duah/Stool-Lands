@@ -9,4 +9,5 @@ userRoute.get('/users', [authMiddleware_1.authMiddleware, authMiddleware_1.roleM
 userRoute.get('/forms', [authMiddleware_1.authMiddleware, authMiddleware_1.roleMiddleware], userController_1.getAllForms);
 userRoute.post('/user-deactivate', [authMiddleware_1.authMiddleware, authMiddleware_1.roleMiddleware], userController_1.userDeactivate);
 userRoute.post('/user-del', [authMiddleware_1.authMiddleware, authMiddleware_1.roleMiddleware], userController_1.deleteUser);
+userRoute.get("/:userid", userController_1.specificForms);
 exports.default = userRoute;

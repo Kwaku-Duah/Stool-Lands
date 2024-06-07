@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.userDeactivate = exports.getAllForms = exports.allUsers = void 0;
+exports.deleteUser = exports.userDeactivate = exports.specificForms = exports.getAllForms = exports.allUsers = void 0;
 const db_1 = __importDefault(require("../dbConfig/db"));
 const allUsers = async (req, res) => {
     try {
@@ -41,6 +41,27 @@ const getAllForms = async (req, res) => {
     }
 };
 exports.getAllForms = getAllForms;
+const specificForms = async (req, res) => {
+    try {
+        const userId = parseInt(req.params.userid, 10);
+        console.log(userId);
+        const applicationForms = await db_1.default.application.findMany({
+            where: { userId },
+            include: { documents: true }
+        });
+        const organizationForms = await db_1.default.organizationForm.findMany({
+            where: { userId },
+            include: { documents: true }
+        });
+        const forms = [...applicationForms, ...organizationForms];
+        res.status(200).json({ success: true, forms });
+    }
+    catch (error) {
+        console.error('Error occurred while fetching forms:', error);
+        res.status(500).json({ success: false, error: 'An error occurred while processing your request' });
+    }
+};
+exports.specificForms = specificForms;
 const userDeactivate = async (req, res) => {
     try {
         const { userId } = req.body;
