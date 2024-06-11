@@ -1936,6 +1936,120 @@ paths:
                   example: An error occurred while processing your request
 
 
+/all/user-activate:
+  post:
+    summary: Activate a user
+    description: Activates a user by setting their activeStatus to true. Cannot admin/deactivate admin or secretary users.
+    tags:
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userId:
+                type: integer
+                description: The ID of the user to activate
+                example: 123
+    responses:
+      '200':
+        description: User activated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: User activated successfully
+                user:
+                  type: object
+                  description: Details of the deactivated user
+                  properties:
+                    id:
+                      type: integer
+                      example: 123
+                    name:
+                      type: string
+                      example: John Doe
+                    email:
+                      type: string
+                      example: johndoe@example.com
+                    phoneNumber:
+                      type: string
+                      example: '1234567890'
+                    occupation:
+                      type: string
+                      example: Developer
+                    role:
+                      type: string
+                      example: USER
+                    activeStatus:
+                      type: boolean
+                      example: false
+      '400':
+        description: Authenticated user required
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  example: Authenticated user required
+      '403':
+        description: Cannot deactivate/activate an admin or secretary user
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  example: Cannot delete an admin or secretary user
+      '404':
+        description: User not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  example: User not found
+      '500':
+        description: An error occurred while processing your request
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: false
+                message:
+                  type: string
+                  example: An error occurred while processing your request
+
+
+
+
+
+
+
 /all/user-deactivate:
   post:
     summary: Deactivate a user
@@ -2401,3 +2515,65 @@ paths:
                 message:
                   type: string
                   example: Internal server error
+
+/all/tickets:
+  get:
+    summary: Retrieve all tickets
+    description: Retrieve a list of all tickets from the database.
+    responses:
+      '200':
+        description: A list of tickets.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tickets:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: The ticket ID
+                        example: 1
+                      email:
+                        type: string
+                        description: The email of the person who created the ticket
+                        example: example@example.com
+                      issue:
+                        type: string
+                        description: The issue reported in the ticket
+                        example: "Login problem"
+                      appNumber:
+                        type: string
+                        description: The application number related to the ticket
+                        example: "APP123456"
+                      priority:
+                        type: string
+                        description: The priority of the ticket
+                        example: "High"
+                      description:
+                        type: string
+                        description: A detailed description of the issue
+                        example: "Application has wrong detail in the uploads"
+      '404':
+        description: No tickets found.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: No tickets found
+      '500':
+        description: An error occurred while processing your request.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: An error occurred while processing your request

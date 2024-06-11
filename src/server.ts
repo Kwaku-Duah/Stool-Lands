@@ -31,14 +31,8 @@ app.get('/hello', (req, res) => {
 
 
 app.use('/', rootRouter);
-app.get('/hi', (req, res) => {
-  res.send('Did the push work?');
-});
-
-
-app.use('/', rootRouter);
-app.get('/checker', (req, res) => {
-  res.send('Did the push work?');
+app.get('/hd', (req, res) => {
+  res.send('Video?');
 });
 
 

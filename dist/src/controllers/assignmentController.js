@@ -102,9 +102,11 @@ const inspectorAssign = async (req, res) => {
             if (assignmentId) {
                 const applicationForm = await db_1.default.application.findUnique({
                     where: { uniqueFormID: assignmentId },
+                    include: { documents: true }
                 });
                 const organizationForm = await db_1.default.organizationForm.findUnique({
                     where: { uniqueFormID: assignmentId },
+                    include: { documents: true }
                 });
                 if (applicationForm) {
                     forms.push(applicationForm);
