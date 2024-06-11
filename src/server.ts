@@ -31,8 +31,8 @@ app.get('/hello', (req, res) => {
 
 
 app.use('/', rootRouter);
-app.get('/hd', (req, res) => {
-  res.send('Video?');
+app.get('/hi', (req, res) => {
+  res.send('Blessings follow my yard');
 });
 
 

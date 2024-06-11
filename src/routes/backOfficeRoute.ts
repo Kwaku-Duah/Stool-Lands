@@ -9,7 +9,6 @@ import upload from '../middleWares/uploadMulter'
 const backRoute: Router = express.Router()
 backRoute.post('/secretary',[authMiddleware,adminMiddleware],createSecretary)
 
-// inspector
 backRoute.post('/proof',[authMiddleware,inspectorMiddleware],upload.any(),inspectProof)
 backRoute.post('/inspector',[authMiddleware,roleMiddleware],createInspector)
 backRoute.post('/chief',[authMiddleware,adminMiddleware],createChief)

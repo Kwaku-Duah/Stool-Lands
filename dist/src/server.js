@@ -27,8 +27,8 @@ app.get('/hello', (req, res) => {
     res.send('Hello to the pakyi lands, you are through, THIS MUST WORK');
 });
 app.use('/', routes_1.default);
-app.get('/hd', (req, res) => {
-    res.send('Video?');
+app.get('/hi', (req, res) => {
+    res.send('Blessings follow my yard');
 });
 (0, swaggerDoc_1.default)(app);
 app.listen(secrets_1.PORT, () => {

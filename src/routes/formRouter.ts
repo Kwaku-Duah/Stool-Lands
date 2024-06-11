@@ -15,19 +15,13 @@ formRouter.get('/applications',[authMiddleware,applicantMiddleware],getFormsCrea
 // approve or deny a form
 formRouter.post('/status',[authMiddleware,inspectorMiddleware],statusForm)
 
-
-
-
-// organization
 formRouter.post('/org-apply',[authMiddleware,applicantMiddleware],upload.any(),createOrganizationForm)
 
-// JOINT appliaction form
 formRouter.post('/joint-apply',[authMiddleware,applicantMiddleware],upload.any(),jointApplicationForm)
 
-// make an enquiry
+
 formRouter.post('/report',createReport)
 
-// raise an issue
 formRouter.post('/issue',createTicket)
 
 export default formRouter;

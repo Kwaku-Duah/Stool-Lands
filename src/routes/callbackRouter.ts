@@ -5,7 +5,6 @@ import { handlePaymentCallback,checkTransactionStatus } from '../controllers/tra
 
 const callbackRoute: Router = express.Router();
 
-// Route for handling payment callbacks
 callbackRoute.post('/callback', handlePaymentCallback);
 callbackRoute.post('/state',checkTransactionStatus)
 
