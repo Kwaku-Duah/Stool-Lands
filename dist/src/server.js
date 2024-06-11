@@ -30,6 +30,10 @@ app.use('/', routes_1.default);
 app.get('/hi', (req, res) => {
     res.send('Did the push work?');
 });
+app.use('/', routes_1.default);
+app.get('/checker', (req, res) => {
+    res.send('Did the push work?');
+});
 (0, swaggerDoc_1.default)(app);
 app.listen(secrets_1.PORT, () => {
     console.log(`Server is running on port ${secrets_1.PORT}`);

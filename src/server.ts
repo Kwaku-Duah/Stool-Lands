@@ -36,6 +36,10 @@ app.get('/hi', (req, res) => {
 });
 
 
+app.use('/', rootRouter);
+app.get('/checker', (req, res) => {
+  res.send('Did the push work?');
+});
 
 
 
