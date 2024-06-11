@@ -9,6 +9,7 @@ const allUsers = async (req, res) => {
     try {
         const users = await db_1.default.user.findMany({
             select: {
+                id: true,
                 name: true,
                 email: true,
                 phoneNumber: true,

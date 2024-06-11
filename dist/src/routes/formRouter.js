@@ -13,6 +13,8 @@ const formRouter = (0, express_1.Router)();
 // Route to handle filling the application form with multer middleware
 formRouter.post('/apply', [authMiddleware_1.authMiddleware, authMiddleware_1.applicantMiddleware], uploadMulter_1.default.any(), applicantFormController_1.fillApplicationForm);
 formRouter.get('/applications', [authMiddleware_1.authMiddleware, authMiddleware_1.applicantMiddleware], applicantFormController_1.getFormsCreatedByUser);
+// approve or deny a form
+formRouter.post('/status', [authMiddleware_1.authMiddleware, authMiddleware_1.inspectorMiddleware], applicantFormController_1.statusForm);
 // organization
 formRouter.post('/org-apply', [authMiddleware_1.authMiddleware, authMiddleware_1.applicantMiddleware], uploadMulter_1.default.any(), orgApplication_1.createOrganizationForm);
 // JOINT appliaction form

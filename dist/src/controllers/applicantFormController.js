@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createReport = exports.createTicket = exports.getFormsCreatedByUser = exports.fillApplicationForm = void 0;
+exports.createReport = exports.createTicket = exports.statusForm = exports.getFormsCreatedByUser = exports.fillApplicationForm = void 0;
 const uuid_1 = require("uuid");
 const client_s3_1 = require("@aws-sdk/client-s3");
 const dotenv_1 = require("dotenv");
@@ -176,6 +176,77 @@ const getFormsCreatedByUser = async (req, res) => {
     }
 };
 exports.getFormsCreatedByUser = getFormsCreatedByUser;
+// approve or deny
+const statusForm = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
+        const user = await db_1.default.user.findUnique({
+            where: { id: userId },
+            select: { email: true }
+        });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        const userEmail = user.email;
+        const inspector = await db_1.default.inspector.findUnique({
+            where: { email: userEmail },
+            select: { inspectorId: true }
+        });
+        if (!inspector) {
+            return res.status(404).json({ message: 'Inspector not found' });
+        }
+        const InspectorId = inspector.inspectorId;
+        const { uniqueFormID, state, reject } = req.body;
+        const validStates = ['APPROVED', 'DENIED'];
+        if (!validStates.includes(state)) {
+            return res.status(400).json({ message: 'Invalid state' });
+        }
+        let formExists = true;
+        let updateResult;
+        const formInApplication = await db_1.default.application.findUnique({
+            where: { uniqueFormID }
+        });
+        if (!formInApplication) {
+            const formInOrganizationForm = await db_1.default.organizationForm.findUnique({
+                where: { uniqueFormID }
+            });
+            if (!formInOrganizationForm) {
+                formExists = false;
+            }
+            else {
+                updateResult = await db_1.default.organizationForm.update({
+                    where: { uniqueFormID },
+                    data: { status: state }
+                });
+            }
+        }
+        else {
+            updateResult = await db_1.default.application.update({
+                where: { uniqueFormID },
+                data: { status: state }
+            });
+        }
+        if (!formExists) {
+            return res.status(404).json({ message: 'Form not found' });
+        }
+        await db_1.default.reason.create({
+            data: {
+                uniqueFormID,
+                InspectorId,
+                reject: reject ? reject : null
+            }
+        });
+        return res.status(200).json({ message: 'Status updated successfully' });
+    }
+    catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
+exports.statusForm = statusForm;
 const createTicket = async (req, res) => {
     try {
         const { email, issue, appNumber, priority, description } = req.body;

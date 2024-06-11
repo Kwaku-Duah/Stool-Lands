@@ -125,7 +125,7 @@ const inspectProof = async (req, res) => {
                 },
             }
         });
-        return res.status(201).json(proof);
+        return res.status(200).json({ success: true, proof });
     }
     catch (error) {
         console.error(error);
