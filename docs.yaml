@@ -2228,3 +2228,176 @@ paths:
                 message:
                   type: string
                   example: An error occurred while processing your request
+
+
+/new/status:
+  post:
+    summary: Update form status
+    description: Updates the status of a form by inspector either approval or denial and reason
+    tags:
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              uniqueFormID:
+                type: string
+                description: The unique identifier of the form.
+                example: "form123"
+              state:
+                type: string
+                description: The new state of the form.
+                enum: [APPROVED, DENIED]
+                example: "APPROVED"
+              reject:
+                type: string
+                description: The reason for rejection (if applicable).
+                example: "Incomplete documentation"
+    responses:
+      '200':
+        description: Status updated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Status updated successfully
+      '400':
+        description: Invalid state or other bad request
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Invalid state
+      '401':
+        description: User not authenticated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: User not authenticated
+      '404':
+        description: User, Inspector, or Form not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Form not found
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal server error
+
+
+/add/proof:
+  post:
+    summary: Upload proof documents
+    description: Uploads proof documents and logs the inspector's details.
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              uniqueFormID:
+                type: string
+                description: The unique identifier of the form.
+                example: "form123"
+              files:
+                type: array
+                items:
+                  type: string
+                  format: binary
+                description: An array of documents to be uploaded.
+    responses:
+      '200':
+        description: Proof documents uploaded successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                proof:
+                  type: object
+                  properties:
+                    uniqueFormID:
+                      type: string
+                      example: form123
+                    inspectorId:
+                      type: string
+                      example: inspector123
+                    documents:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          url:
+                            type: string
+                            example: https://bucket-name.s3.amazonaws.com/key
+      '400':
+        description: Bad request (e.g., no documents uploaded)
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: No documents uploaded
+      '401':
+        description: User not authenticated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: User not authenticated
+      '404':
+        description: User or Inspector not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: User not found
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Internal server error

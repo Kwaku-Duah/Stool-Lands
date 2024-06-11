@@ -3,12 +3,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createInspector = void 0;
+exports.inspectProof = exports.createInspector = void 0;
 const client_1 = require("@prisma/client");
 const backRoom_1 = require("../services/backRoom");
 const db_1 = __importDefault(require("../dbConfig/db"));
+const uuid_1 = require("uuid");
+const client_s3_1 = require("@aws-sdk/client-s3");
+const dotenv_1 = require("dotenv");
+const multer_1 = __importDefault(require("multer"));
 const passworGenerator_1 = require("../utils/passworGenerator");
 const hashPassword_1 = require("../utils/hashPassword");
+(0, dotenv_1.config)();
+const s3Client = new client_s3_1.S3Client({
+    region: process.env.AWS_REGION,
+    credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+    }
+});
+const upload = (0, multer_1.default)();
 const generateInspectorId = async () => {
     const existingInspectorCount = await db_1.default.inspector.count();
     const inspectorCount = existingInspectorCount + 1;
@@ -61,3 +74,62 @@ const createInspector = async (req, res) => {
     }
 };
 exports.createInspector = createInspector;
+// inspector uploading form proof
+const inspectProof = async (req, res) => {
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
+        const user = await db_1.default.user.findUnique({
+            where: { id: userId },
+            select: { email: true }
+        });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        const userEmail = user.email;
+        const inspector = await db_1.default.inspector.findUnique({
+            where: { email: userEmail },
+            select: { inspectorId: true }
+        });
+        if (!inspector) {
+            return res.status(404).json({ message: 'Inspector not found' });
+        }
+        const inspectorId = inspector.inspectorId;
+        const { uniqueFormID } = req.body;
+        if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+            return res.status(400).json({ error: 'No documents uploaded' });
+        }
+        const uploadedDocumentUrls = await Promise.all(Object.values(req.files).map(async (file) => {
+            const key = `${userId}/${(0, uuid_1.v4)()}-${file.originalname}`;
+            const params = {
+                Bucket: process.env.BUCKET_NAME,
+                Key: key,
+                Body: file.buffer,
+                ContentType: file.mimetype
+            };
+            await s3Client.send(new client_s3_1.PutObjectCommand(params));
+            return {
+                url: `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${key}`
+            };
+        }));
+        const proof = await db_1.default.inspectUpload.create({
+            data: {
+                uniqueFormID,
+                inspectorId,
+                documents: {
+                    createMany: {
+                        data: uploadedDocumentUrls
+                    }
+                },
+            }
+        });
+        return res.status(201).json(proof);
+    }
+    catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
+exports.inspectProof = inspectProof;

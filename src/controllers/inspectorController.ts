@@ -2,8 +2,27 @@ import { Request as ExpressRequest, Response } from 'express';
 import {  ROLE } from '@prisma/client';
 import { backroomMessage } from '../services/backRoom';
 import db from '../dbConfig/db'
+import { v4 as uuidv4 } from 'uuid';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { config } from 'dotenv';
+import multer from 'multer';
 import { generateTemporaryPassword } from '../utils/passworGenerator';
 import { hashPassword } from '../utils/hashPassword';
+
+config();
+
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION!,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!
+  }
+});
+
+const upload = multer();
+
+
+
 
 const generateInspectorId = async (): Promise<string> => {
   const existingInspectorCount = await db.inspector.count();
@@ -78,3 +97,78 @@ export const createInspector = async (req: Request, res: Response) => {
   }
 };
 
+
+// inspector uploading form proof
+export const inspectProof = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
+
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: { email: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const userEmail = user.email;
+
+    const inspector = await db.inspector.findUnique({
+      where: { email: userEmail! },
+      select: { inspectorId: true }
+    });
+
+    if (!inspector) {
+      return res.status(404).json({ message: 'Inspector not found' });
+    }
+
+    const inspectorId = inspector.inspectorId;
+
+    const { uniqueFormID } = req.body;
+
+    if (!req.files || !Array.isArray(req.files) || req.files.length === 0) {
+      return res.status(400).json({ error: 'No documents uploaded' });
+    }
+
+    const uploadedDocumentUrls = await Promise.all(
+      Object.values(req.files).map(async (file: any) => {
+        const key = `${userId}/${uuidv4()}-${file.originalname}`;
+        const params = {
+          Bucket: process.env.BUCKET_NAME!,
+          Key: key,
+          Body: file.buffer,
+          ContentType: file.mimetype
+        };
+
+        await s3Client.send(new PutObjectCommand(params));
+
+        return {
+          url: `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/${key}`
+        };
+      })
+    );
+
+    const proof = await db.inspectUpload.create({
+      data: {
+        uniqueFormID,
+        inspectorId,
+        documents: {
+          createMany: {
+            data: uploadedDocumentUrls
+          }
+        },
+      }
+    });
+
+    return res.status(200).json({success: true, proof});
+
+  } catch (error: unknown) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};

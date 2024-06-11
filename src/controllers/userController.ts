@@ -17,6 +17,7 @@ export const allUsers = async (req: Request, res: Response) => {
 
     const users = await db.user.findMany({
       select: {
+        id:true,
         name: true,
         email: true,
         phoneNumber: true,

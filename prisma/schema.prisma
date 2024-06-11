@@ -128,7 +128,7 @@ model OrganizationForm {
   contactOfTransferor    String?
   type                   String?
   documents              orgDocument[]
-  status                 ApplicationStatus
+  status                 ApplicationStatus   @default(PENDING)
   createdAt              DateTime          @default(now())
   User                   User              @relation(fields: [userId], references: [id])
   userId                 Int
@@ -217,10 +217,33 @@ model Inspector {
   invitations Invitation[]
 }
 
+model InspectUpload {
+  id          Int          @id @default(autoincrement())
+  uniqueFormID String      @unique
+  inspectorId String       @unique
+  documents   ProofDocuments[]
+  createdAt              DateTime          @default(now())
+}
+
+model Reason {
+  id          Int          @id @default(autoincrement())
+  uniqueFormID String      @unique
+  InspectorId  String      
+  reject       String?
+}
+
+model ProofDocuments {
+  id          Int          @id @default(autoincrement())
+  url         String
+  inspection   InspectUpload    @relation(fields: [InspectorId], references: [inspectorId])
+  InspectorId  String
+}
+
 model Assignment {
   id           Int          @id @default(autoincrement())
   uniqueFormID String?      @unique
   secretaryId  String
+  timeAssigned              DateTime          @default(now())
   isAssigned   Boolean      @default(false)
   secretary    Secretary    @relation(fields: [secretaryId], references: [secretaryId])
   invitations  Invitation[]
@@ -230,6 +253,7 @@ model Assignment {
 model Invitation {
   id           Int         @id @default(autoincrement())
   inspectors   Inspector[]
+  timeAssigned              DateTime          @default(now())
   Assignment   Assignment? @relation(fields: [assignmentId], references: [uniqueFormID])
   assignmentId String?
 }

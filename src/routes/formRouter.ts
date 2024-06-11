@@ -1,8 +1,8 @@
 import {Router} from 'express';
-import { fillApplicationForm,getFormsCreatedByUser,createTicket,createReport } from '../controllers/applicantFormController';
+import { fillApplicationForm,getFormsCreatedByUser,createTicket,createReport,statusForm } from '../controllers/applicantFormController';
 import { createOrganizationForm } from '../controllers/orgApplication';
 import { jointApplicationForm } from '../controllers/jointForm';
-import { authMiddleware,applicantMiddleware, roleMiddleware} from '../middleWares/authMiddleware';
+import { authMiddleware,applicantMiddleware,inspectorMiddleware} from '../middleWares/authMiddleware';
 import upload from '../middleWares/uploadMulter'
 
 
@@ -12,6 +12,8 @@ const formRouter: Router = Router();
 formRouter.post('/apply', [authMiddleware,applicantMiddleware],upload.any(),fillApplicationForm);
 formRouter.get('/applications',[authMiddleware,applicantMiddleware],getFormsCreatedByUser)
 
+// approve or deny a form
+formRouter.post('/status',[authMiddleware,inspectorMiddleware],statusForm)
 
 
 

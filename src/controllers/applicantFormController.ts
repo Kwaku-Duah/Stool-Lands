@@ -4,6 +4,7 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { config } from 'dotenv';
 import multer from 'multer';
 import db from '../dbConfig/db';
+import { ApplicationStatus } from '@prisma/client'
 
 config();
 
@@ -226,6 +227,100 @@ export const getFormsCreatedByUser = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, error: 'An error occurred while processing your request' });
   }
 };
+
+
+
+
+
+
+
+// approve or deny
+export const statusForm = async (req: Request, res: Response) => {
+  try {
+
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
+
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: { email: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const userEmail = user.email;
+
+    const inspector = await db.inspector.findUnique({
+      where: { email: userEmail! },
+      select: { inspectorId: true }
+    });
+
+    if (!inspector) {
+      return res.status(404).json({ message: 'Inspector not found' });
+    }
+
+    const InspectorId = inspector.inspectorId;
+
+
+    const { uniqueFormID, state, reject } = req.body;
+
+    const validStates = ['APPROVED', 'DENIED'];
+    if (!validStates.includes(state)) {
+      return res.status(400).json({ message: 'Invalid state' });
+    }
+
+    let formExists = true;
+    let updateResult;
+
+    const formInApplication = await db.application.findUnique({
+      where: { uniqueFormID }
+    });
+
+    if (!formInApplication) {
+      const formInOrganizationForm = await db.organizationForm.findUnique({
+        where: { uniqueFormID }
+      });
+
+      if (!formInOrganizationForm) {
+        formExists = false;
+      } else {
+        updateResult = await db.organizationForm.update({
+          where: { uniqueFormID },
+          data: { status: state }
+        });
+      }
+    } else {
+      updateResult = await db.application.update({
+        where: { uniqueFormID },
+        data: { status: state }
+      });
+    }
+
+    if (!formExists) {
+      return res.status(404).json({ message: 'Form not found' });
+    }
+
+    await db.reason.create({
+      data: {
+        uniqueFormID,
+        InspectorId,
+        reject: reject ? reject : null
+      }
+    });
+
+    return res.status(200).json({ message: 'Status updated successfully' });
+  } catch (error: unknown) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+
 
 
 
