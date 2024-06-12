@@ -35,9 +35,11 @@ const assignInspector = async (req, res) => {
         // Check if the uniqueFormID exists in either Application or OrganizationForm
         const assignedApplication = await db_1.default.application.findUnique({
             where: { uniqueFormID },
+            include: { documents: true }
         });
         const assignedOrganizationForm = await db_1.default.organizationForm.findUnique({
             where: { uniqueFormID },
+            include: { documents: true }
         });
         if (!assignedApplication && !assignedOrganizationForm) {
             return res.status(404).json({ success: false, message: 'Form not found' });

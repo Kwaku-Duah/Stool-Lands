@@ -98,6 +98,8 @@ export const createInspector = async (req: Request, res: Response) => {
 };
 
 
+
+
 // inspector uploading form proof
 export const inspectProof = async (req: Request, res: Response) => {
   try {
@@ -161,7 +163,10 @@ export const inspectProof = async (req: Request, res: Response) => {
           createMany: {
             data: uploadedDocumentUrls
           }
-        },
+        }, 
+      },
+      include: {
+        documents: true
       }
     });
 

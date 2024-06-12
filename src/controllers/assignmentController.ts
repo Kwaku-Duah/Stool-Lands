@@ -53,9 +53,11 @@ export const assignInspector = async (req: Request, res: Response) => {
       // Check if the uniqueFormID exists in either Application or OrganizationForm
       const assignedApplication = await db.application.findUnique({
         where: { uniqueFormID },
+        include: { documents: true }
       });
       const assignedOrganizationForm = await db.organizationForm.findUnique({
         where: { uniqueFormID },
+        include: {documents: true}
       });
   
       if (!assignedApplication && !assignedOrganizationForm) {

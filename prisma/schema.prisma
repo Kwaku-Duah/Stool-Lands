@@ -188,17 +188,20 @@ enum FormStatus {
 
 model Report {
   id          Int    @id @default(autoincrement())
+  firstName   String
+  lastName    String
   email       String
-  issue       String
-  priority    String
+  phoneNumber String
   description String
 }
 
 model Ticket {
   id          Int    @id @default(autoincrement())
+  name        String
   email       String
   issue       String
-  appNumber   String
+  createdAt   DateTime          @default(now())
+  appNumber   String?
   priority    String
   description String
 }
@@ -217,13 +220,7 @@ model Inspector {
   invitations Invitation[]
 }
 
-model InspectUpload {
-  id          Int          @id @default(autoincrement())
-  uniqueFormID String      @unique
-  inspectorId String       @unique
-  documents   ProofDocuments[]
-  createdAt              DateTime          @default(now())
-}
+
 
 model Reason {
   id          Int          @id @default(autoincrement())
@@ -232,11 +229,19 @@ model Reason {
   reject       String?
 }
 
+
+model InspectUpload {
+  id          Int          @id @default(autoincrement())
+  uniqueFormID String      @unique
+  inspectorId  String    
+  documents   ProofDocuments[]
+  createdAt              DateTime          @default(now())
+}
 model ProofDocuments {
   id          Int          @id @default(autoincrement())
   url         String
-  inspection   InspectUpload    @relation(fields: [InspectorId], references: [inspectorId])
-  InspectorId  String
+  inspection  InspectUpload @relation(fields: [inspectUploadId], references: [id])
+  inspectUploadId  Int
 }
 
 model Assignment {

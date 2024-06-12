@@ -123,6 +123,9 @@ const inspectProof = async (req, res) => {
                         data: uploadedDocumentUrls
                     }
                 },
+            },
+            include: {
+                documents: true
             }
         });
         return res.status(200).json({ success: true, proof });

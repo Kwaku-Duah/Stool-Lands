@@ -94,7 +94,7 @@ export const allTickets = async (req: Request, res: Response) => {
     const tickets = await db.ticket.findMany();
 
     if (tickets.length === 0) {
-      return res.status(404).json({ message: 'No tickets found' });
+      return res.status(200).json({ message: 'No tickets yet' });
     }
 
     res.status(200).json({ tickets });

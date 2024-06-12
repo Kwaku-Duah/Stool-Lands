@@ -249,12 +249,13 @@ const statusForm = async (req, res) => {
 exports.statusForm = statusForm;
 const createTicket = async (req, res) => {
     try {
-        const { email, issue, appNumber, priority, description } = req.body;
-        if (!email || !issue || !appNumber || !priority || !description) {
-            return res.status(400).json({ message: 'All fields are required' });
+        const { name, email, issue, appNumber, priority, description } = req.body;
+        if (!name || !email || !issue || !priority || !description) {
+            return res.status(400).json({ message: 'All these fields fields are required' });
         }
         const ticket = await db_1.default.ticket.create({
             data: {
+                name,
                 email,
                 issue,
                 appNumber,
@@ -273,15 +274,16 @@ const createTicket = async (req, res) => {
 exports.createTicket = createTicket;
 const createReport = async (req, res) => {
     try {
-        const { email, issue, priority, description } = req.body;
-        if (!email || !issue || !priority || !description) {
+        const { firstName, lastName, email, phoneNumber, description } = req.body;
+        if (!email || !firstName || !lastName || phoneNumber || !description) {
             return res.status(400).json({ message: 'All fields are required' });
         }
         const report = await db_1.default.report.create({
             data: {
+                firstName,
+                lastName,
                 email,
-                issue,
-                priority,
+                phoneNumber,
                 description
             }
         });
