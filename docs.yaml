@@ -1390,16 +1390,19 @@ paths:
           schema:
             type: object
             properties:
+              firstname:
+                type: string
+                description: firstname of reporter
+              lastname:
+                type: string
+                description: lastname of reporter
+              phoneNumber:
+                type: string
+                description: firstname of reporter
               email:
                 type: string
                 format: email
                 description: Email address of the reporter.
-              issue:
-                type: string
-                description: Description of the issue.
-              priority:
-                type: string
-                description: Priority level of the issue.
               description:
                 type: string
                 description: Detailed description of the issue.
@@ -1421,16 +1424,19 @@ paths:
                     id:
                       type: integer
                       description: Unique ID of the report.
+                    firstname:
+                      type: string
+                      description: firstname of the reporter
+                    lastname:
+                      type: string
+                      description: lastname of the reporter
                     email:
                       type: string
                       format: email
                       description: Email address of the reporter.
-                    issue:
+                    phoneNumber:
                       type: string
-                      description: Description of the issue.
-                    priority:
-                      type: string
-                      description: Priority level of the issue.
+                      description: PhoneNumber.
                     description:
                       type: string
                       description: Detailed description of the issue.

@@ -363,7 +363,7 @@ export const createReport = async (req: Request, res: Response) => {
   try {
     const { firstName, lastName,email, phoneNumber, description } = req.body;
 
-    if (!email || !firstName || !lastName || phoneNumber  || !description) {
+    if (!email || !firstName || !lastName || !phoneNumber  || !description) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 

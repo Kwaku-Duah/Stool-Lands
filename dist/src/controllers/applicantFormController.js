@@ -275,7 +275,7 @@ exports.createTicket = createTicket;
 const createReport = async (req, res) => {
     try {
         const { firstName, lastName, email, phoneNumber, description } = req.body;
-        if (!email || !firstName || !lastName || phoneNumber || !description) {
+        if (!email || !firstName || !lastName || !phoneNumber || !description) {
             return res.status(400).json({ message: 'All fields are required' });
         }
         const report = await db_1.default.report.create({
