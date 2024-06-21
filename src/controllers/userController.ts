@@ -203,6 +203,8 @@ export const deleteUser = async (req: Request, res: Response) => {
       },
     });
 
+
+    
     return res.status(200).json({ success: true, message: 'User nullified successfully', nullifiedUser });
   } catch (error) {
     console.error('Error occurred while nullifying user:', error);
