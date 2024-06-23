@@ -2583,3 +2583,328 @@ paths:
                 error:
                   type: string
                   example: An error occurred while processing your request
+
+
+/add/schedule:
+  post:
+    summary: Create a new appointment (Chief)
+    description: >
+      Endpoint to create a new appointment by the Chief. Only authenticated secretaries can schedule appointments.
+    tags:
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+                description: The title of the appointment.
+                example: Meeting with Land Committee
+              tag:
+                type: string
+                description: A tag or category for the appointment.
+                example: Committee Meeting
+              applicantName:
+                type: string
+                description: The name of the applicant.
+                example: John Doe
+              inspectorEmail:
+                type: string
+                description: The email of the inspector.
+                example: inspector@example.com
+              scheduledAt:
+                type: string
+                format: date-time
+                description: >
+                  Optional. The scheduled date and time of the appointment.
+                  If not provided, appointment scheduling will default to now.
+                example: '2024-06-24T09:00:00Z'
+    responses:
+      '201':
+        description: Appointment created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Appointment created successfully
+                appointment:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    title:
+                      type: string
+                      example: Meeting with Land Committee
+                    tag:
+                      type: string
+                      example: Committee Meeting
+                    applicantName:
+                      type: string
+                      example: John Doe
+                    inspectorEmail:
+                      type: string
+                      example: inspector@example.com
+                    scheduledAt:
+                      type: string
+                      format: date-time
+                      example: '2024-06-24T09:00:00Z'
+      '400':
+        description: Bad request. Invalid input data.
+      '401':
+        description: Unauthorized. Only authorized secretaries can perform this action.
+      '404':
+        description: Not Found. Applicant or inspector not found.
+      '500':
+        description: Internal Server Error. An error occurred while processing the request.
+
+
+/status/events:
+  get:
+    summary: Fetch all appointments
+    description: Retrieve all appointments from the database, including associated inspector details. Only an admin can access this endpoint.
+    tags:
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: Successfully fetched all appointments
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                appointments:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      title:
+                        type: string
+                      tag:
+                        type: string
+                      applicantName:
+                        type: string
+                      inspectorEmail:
+                        type: string
+                      scheduledAt:
+                        type: string
+                        format: date-time
+                      inspector:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                          email:
+                            type: string
+                          inspectorId:
+                            type: string
+      '401':
+        description: Unauthorized - Only admins can access this endpoint
+      '500':
+        description: An error occurred while processing the request
+
+
+/status/user-count:
+  get:
+    summary: Get user count
+    description: Retrieve the total number of users from the users table. Only an admin can access this endpoint.
+    tags:
+    security:
+      - bearerAuth: []
+    responses:
+      '200':
+        description: Successfully fetched user count
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userCount:
+                  type: integer
+      '401':
+        description: Unauthorized - Only admins can access this endpoint
+      '500':
+        description: An error occurred while processing the request
+
+
+/status/total-approved:
+  get:
+    summary: Count total approved forms
+    description: Fetch the total number of forms with the status "APPROVED" from both the application and organizationForm models.
+    tags:
+    responses:
+      '200':
+        description: Successful response with the total count of approved forms.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                totalApprovedCount:
+                  type: integer
+                  description: The total number of approved forms.
+                  example: 42
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: An error occurred while processing your request
+    security:
+      - bearerAuth: []
+
+
+/status/total-denied:
+  get:
+    summary: Count total denied forms
+    description: Fetch the total number of forms with the status "DENIED" from both the application and organizationForm models.
+    tags:
+    responses:
+      '200':
+        description: Successful response with the total count of denied forms.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                totalDeniedCount:
+                  type: integer
+                  description: The total number of denied forms.
+                  example: 17
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: An error occurred while processing your request
+    security:
+      - bearerAuth: []
+
+
+
+
+/status/delete:
+  summary: Delete an appointment (Admin)
+  description: Deletes an appointment by ID. Only admins can perform this operation.
+  tags:
+  security:
+    - bearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: ID of the appointment to delete
+          required:
+            - id
+  responses:
+    '200':
+      description: Appointment deleted successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Appointment deleted successfully
+    '404':
+      description: Appointment not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Appointment not found
+    '500':
+      description: An error occurred while processing your request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: An error occurred while processing your request
+
+/new/ticket-reply:
+  post:
+    summary: Respond to a Ticket
+    description: >
+      Responds to a ticket either by `name` or `appNumber`, updates the ticket status to "ADDRESSED",
+      and saves the response in the TicketReply table.
+    tags:
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the ticket holder.
+              appNumber:
+                type: string
+                description: Unique form ID associated with the ticket.
+              description:
+                type: string
+                description: Response to the ticket issue.
+            required:
+              - name
+              - description
+    responses:
+      '200':
+        description: Successful response indicating the ticket was responded to.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Ticket responded to successfully
+      '404':
+        description: Ticket not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: Ticket not found
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: An error occurred while processing your request
+    security:
+      - bearerAuth: []

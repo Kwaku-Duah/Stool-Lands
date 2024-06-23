@@ -1,6 +1,6 @@
 import {Router}from 'express';
 import { allUsers, getAllForms, specificForms, userActivate,userDeactivate,deleteUser ,allTickets} from '../controllers/userController';
-import { authMiddleware,roleMiddleware } from '../middleWares/authMiddleware';
+import { adminMiddleware, authMiddleware,roleMiddleware } from '../middleWares/authMiddleware';
 
 const userRoute: Router = Router()
 
@@ -13,4 +13,6 @@ userRoute.post('/user-deactivate',[authMiddleware,roleMiddleware], userDeactivat
 userRoute.post('/user-del',[authMiddleware,roleMiddleware],deleteUser)
 userRoute.get("/:userid", [authMiddleware,roleMiddleware],specificForms)
 userRoute.post('/user-activate',[authMiddleware,roleMiddleware],userActivate)
+
+
 export default userRoute;

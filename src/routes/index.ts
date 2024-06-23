@@ -7,6 +7,9 @@ import callbackRoute from './callbackRouter';
 import backRoute from './backOfficeRoute';
 import userRoute from './userRoutes';
 import assignRoute from './assignRoute'
+import chiefRouter from './chiefRoute';
+
+
 
 
 
@@ -19,4 +22,5 @@ rootRouter.use('/new',formRouter)
 rootRouter.use('/add',backRoute)
 rootRouter.use('/all', userRoute)
 rootRouter.use('/ins',assignRoute)
+rootRouter.use('/status',chiefRouter)
 export default rootRouter;

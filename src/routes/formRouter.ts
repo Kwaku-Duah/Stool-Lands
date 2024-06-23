@@ -1,8 +1,8 @@
 import {Router} from 'express';
-import { fillApplicationForm,getFormsCreatedByUser,createTicket,createReport,statusForm } from '../controllers/applicantFormController';
+import { fillApplicationForm,getFormsCreatedByUser,createTicket,createReport,statusForm, handleTicketResponse } from '../controllers/applicantFormController';
 import { createOrganizationForm } from '../controllers/orgApplication';
 import { jointApplicationForm } from '../controllers/jointForm';
-import { authMiddleware,applicantMiddleware,inspectorMiddleware} from '../middleWares/authMiddleware';
+import { authMiddleware,applicantMiddleware,inspectorMiddleware, roleMiddleware} from '../middleWares/authMiddleware';
 import upload from '../middleWares/uploadMulter'
 
 
@@ -19,9 +19,12 @@ formRouter.post('/org-apply',[authMiddleware,applicantMiddleware],upload.any(),c
 
 formRouter.post('/joint-apply',[authMiddleware,applicantMiddleware],upload.any(),jointApplicationForm)
 
+formRouter.post('/ticket-reply',[authMiddleware,roleMiddleware],handleTicketResponse);
+
 
 formRouter.post('/report',createReport)
 
-formRouter.post('/issue',createTicket)
+// ticket endpoint can only be accessed by applicatants
+formRouter.post('/issue',[authMiddleware,applicantMiddleware],createTicket)
 
 export default formRouter;

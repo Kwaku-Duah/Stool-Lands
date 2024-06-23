@@ -201,9 +201,25 @@ model Ticket {
   email       String
   issue       String
   createdAt   DateTime          @default(now())
-  appNumber   String?
+  appNumber   String?            
   priority    String
   description String
+  status      TicketStatus  @default(PENDING)
+  replies     TicketReply[]
+}
+
+model TicketReply {
+  id          Int    @id @default(autoincrement())
+  response    String
+  ticketing   Ticket @relation(fields: [ticketId], references: [id])
+  ticketId    Int
+}
+
+
+
+enum TicketStatus {
+  ADDRESSED
+  PENDING
 }
 
 model Secretary {
@@ -218,6 +234,7 @@ model Inspector {
   email       String       @unique
   inspectorId String       @unique
   invitations Invitation[]
+  appointments Appointment[]
 }
 
 
@@ -268,3 +285,15 @@ model Chief {
   email   String @unique
   chiefId String @unique
 }
+
+model Appointment {
+  id              Int        @id @default(autoincrement())
+  title           String
+  tag             String
+  applicantName   String
+  inspectorEmail  String
+  inspector       Inspector  @relation(fields: [inspectorId], references: [id])
+  inspectorId     Int
+  scheduledAt     DateTime?
+}
+

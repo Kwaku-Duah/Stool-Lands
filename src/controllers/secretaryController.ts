@@ -69,3 +69,58 @@ export const createSecretary = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'An error occurred while processing your request' });
   }
 };
+
+
+
+
+
+
+export const appointmentChief = async (req: Request, res: Response) => {
+  try {
+    const { title, tag, applicantName, inspectorEmail, scheduledAt } = req.body;
+
+    const applicant = await db.user.findFirst({
+      where: {
+        name: applicantName,
+        role: ROLE.APPLICANT,
+      },
+    });
+
+    if (!applicant) {
+      return res.status(404).json({ message: 'Applicant not found or invalid input' });
+    }
+
+
+    const inspector = await db.inspector.findFirst({
+      where: {
+        email: inspectorEmail,
+      },
+    });
+
+
+    if (!inspector) {
+      return res.status(404).json({ message: 'Inspector not found' });
+    }
+
+
+    const scheduledDateTime = scheduledAt ? new Date(scheduledAt) : null;
+
+    const newAppointment = await db.appointment.create({
+      data: {
+        title,
+        tag,
+        applicantName,
+        inspectorEmail: inspector.email,
+        inspectorId: inspector.id,
+        scheduledAt: scheduledDateTime,
+      },
+    });
+
+    res.status(201).json({ message: 'Appointment created successfully', appointment: newAppointment });
+  } catch (error) {
+    console.error('Error occurred while creating appointment:', error);
+    res.status(500).json({ error: 'An error occurred while processing your request' });
+  }
+};
+
+

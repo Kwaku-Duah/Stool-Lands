@@ -6,7 +6,10 @@ WORKDIR /app
 
 # Copy package.json and yarn.lock to the working directory
 COPY package.json yarn.lock ./
+
+# Making a copy for the prisma files
 COPY prisma/ ./prisma
+
 # Install dependencies
 RUN yarn install
 RUN yarn prisma:generate
