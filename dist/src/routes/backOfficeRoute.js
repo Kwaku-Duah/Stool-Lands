@@ -14,4 +14,5 @@ backRoute.post('/secretary', [authMiddleware_1.authMiddleware, authMiddleware_1.
 backRoute.post('/proof', [authMiddleware_1.authMiddleware, authMiddleware_1.inspectorMiddleware], uploadMulter_1.default.any(), inspectorController_1.inspectProof);
 backRoute.post('/inspector', [authMiddleware_1.authMiddleware, authMiddleware_1.roleMiddleware], inspectorController_1.createInspector);
 backRoute.post('/chief', [authMiddleware_1.authMiddleware, authMiddleware_1.adminMiddleware], chiefController_1.createChief);
+backRoute.post('/schedule', [authMiddleware_1.authMiddleware, authMiddleware_1.secretaryMiddleware], secretaryController_1.appointmentChief);
 exports.default = backRoute;

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createReport = exports.createTicket = exports.statusForm = exports.getFormsCreatedByUser = exports.fillApplicationForm = void 0;
+exports.handleTicketResponse = exports.createReport = exports.createTicket = exports.statusForm = exports.getFormsCreatedByUser = exports.fillApplicationForm = void 0;
 const uuid_1 = require("uuid");
 const client_s3_1 = require("@aws-sdk/client-s3");
 const dotenv_1 = require("dotenv");
@@ -295,3 +295,45 @@ const createReport = async (req, res) => {
     }
 };
 exports.createReport = createReport;
+const handleTicketResponse = async (req, res) => {
+    try {
+        const { name, appNumber, description } = req.body;
+        let ticketId;
+        if (appNumber) {
+            const ticket = await db_1.default.ticket.findFirst({
+                where: { appNumber },
+                select: { id: true },
+            });
+            if (!ticket) {
+                return res.status(404).json({ message: 'Ticket not found' });
+            }
+            ticketId = ticket.id;
+        }
+        else {
+            const ticketByName = await db_1.default.ticket.findFirst({
+                where: { name },
+                select: { id: true },
+            });
+            if (!ticketByName) {
+                return res.status(404).json({ message: 'Ticket not found' });
+            }
+            ticketId = ticketByName.id;
+        }
+        await db_1.default.ticket.update({
+            where: { id: ticketId },
+            data: { status: 'ADDRESSED' },
+        });
+        await db_1.default.ticketReply.create({
+            data: {
+                response: description,
+                ticketId,
+            },
+        });
+        res.status(200).json({ message: 'Ticket responded to successfully' });
+    }
+    catch (error) {
+        console.error('Error occurred while handling ticket response:', error);
+        res.status(500).json({ error: 'An error occurred while processing your request' });
+    }
+};
+exports.handleTicketResponse = handleTicketResponse;

@@ -17,6 +17,8 @@ formRouter.get('/applications', [authMiddleware_1.authMiddleware, authMiddleware
 formRouter.post('/status', [authMiddleware_1.authMiddleware, authMiddleware_1.inspectorMiddleware], applicantFormController_1.statusForm);
 formRouter.post('/org-apply', [authMiddleware_1.authMiddleware, authMiddleware_1.applicantMiddleware], uploadMulter_1.default.any(), orgApplication_1.createOrganizationForm);
 formRouter.post('/joint-apply', [authMiddleware_1.authMiddleware, authMiddleware_1.applicantMiddleware], uploadMulter_1.default.any(), jointForm_1.jointApplicationForm);
+formRouter.post('/ticket-reply', [authMiddleware_1.authMiddleware, authMiddleware_1.roleMiddleware], applicantFormController_1.handleTicketResponse);
 formRouter.post('/report', applicantFormController_1.createReport);
-formRouter.post('/issue', applicantFormController_1.createTicket);
+// ticket endpoint can only be accessed by applicatants
+formRouter.post('/issue', [authMiddleware_1.authMiddleware, authMiddleware_1.applicantMiddleware], applicantFormController_1.createTicket);
 exports.default = formRouter;

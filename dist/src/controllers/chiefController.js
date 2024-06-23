@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createChief = void 0;
+exports.deleteAppointment = exports.countDeniedForms = exports.countApprovedForms = exports.userCount = exports.allevents = exports.createChief = void 0;
 const client_1 = require("@prisma/client");
 const backRoom_1 = require("../services/backRoom");
 const db_1 = __importDefault(require("../dbConfig/db"));
@@ -61,3 +61,99 @@ const createChief = async (req, res) => {
     }
 };
 exports.createChief = createChief;
+const allevents = async (req, res) => {
+    try {
+        console.log("Does it reach here?");
+        const allAppointments = await db_1.default.appointment.findMany({
+            include: {
+                inspector: true,
+            },
+        });
+        res.status(200).json({ appointments: allAppointments });
+    }
+    catch (error) {
+        console.error('Error occurred while fetching appointments:', error);
+        res.status(500).json({ error: 'An error occurred while processing your request' });
+    }
+};
+exports.allevents = allevents;
+const userCount = async (req, res) => {
+    try {
+        const count = await db_1.default.user.count();
+        res.status(200).json({ userCount: count });
+    }
+    catch (error) {
+        console.error('Error occurred while fetching user count:', error);
+        res.status(500).json({ error: 'An error occurred while processing your request' });
+    }
+};
+exports.userCount = userCount;
+const countApprovedForms = async (req, res) => {
+    try {
+        const approvedApplicationsCount = await db_1.default.application.count({
+            where: {
+                status: 'APPROVED',
+            },
+        });
+        const approvedOrganizationFormsCount = await db_1.default.organizationForm.count({
+            where: {
+                status: 'APPROVED',
+            },
+        });
+        const totalApprovedCount = approvedApplicationsCount + approvedOrganizationFormsCount;
+        res.status(200).json({
+            totalApprovedCount,
+        });
+    }
+    catch (error) {
+        console.error('Error occurred while counting approved forms:', error);
+        res.status(500).json({ error: 'An error occurred while processing your request' });
+    }
+};
+exports.countApprovedForms = countApprovedForms;
+const countDeniedForms = async (req, res) => {
+    try {
+        const deniedApplicationsCount = await db_1.default.application.count({
+            where: {
+                status: 'DENIED',
+            },
+        });
+        const deniedOrganizationFormsCount = await db_1.default.organizationForm.count({
+            where: {
+                status: 'DENIED',
+            },
+        });
+        const totalDeniedCount = deniedApplicationsCount + deniedOrganizationFormsCount;
+        res.status(200).json({
+            totalDeniedCount,
+        });
+    }
+    catch (error) {
+        console.error('Error occurred while counting denied forms:', error);
+        res.status(500).json({ error: 'An error occurred while processing your request' });
+    }
+};
+exports.countDeniedForms = countDeniedForms;
+const deleteAppointment = async (req, res) => {
+    try {
+        const { id } = req.body;
+        if (!id) {
+            return res.status(400).json({ message: 'ID is required' });
+        }
+        const appointment = await db_1.default.appointment.findUnique({
+            where: { id: Number(id) },
+        });
+        if (!appointment) {
+            return res.status(404).json({ message: 'Appointment not found' });
+        }
+        await db_1.default.appointment.delete({
+            where: { id: Number(id) },
+        });
+        res.status(200).json({ message: 'Appointment deleted successfully' });
+    }
+    catch (error) {
+        console.error('Error occurred while deleting appointment:', error);
+        res.status(500).json({ error: 'An error occurred while processing your request' });
+    }
+};
+exports.deleteAppointment = deleteAppointment;

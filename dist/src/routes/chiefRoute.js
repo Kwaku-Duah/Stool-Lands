@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const chiefController_1 = require("../controllers/chiefController");
+const authMiddleware_1 = require("../middleWares/authMiddleware");
+const chiefRouter = (0, express_1.Router)();
+chiefRouter.get('/events', [authMiddleware_1.authMiddleware, authMiddleware_1.adminMiddleware], chiefController_1.allevents);
+chiefRouter.get('/user-count', [authMiddleware_1.authMiddleware, authMiddleware_1.roleMiddleware], chiefController_1.userCount);
+chiefRouter.get('/total-approved', [authMiddleware_1.authMiddleware, authMiddleware_1.roleMiddleware], chiefController_1.countApprovedForms);
+chiefRouter.get('/total-denied', [authMiddleware_1.authMiddleware, authMiddleware_1.roleMiddleware], chiefController_1.countDeniedForms);
+chiefRouter.delete('/delete', chiefController_1.deleteAppointment);
+exports.default = chiefRouter;
