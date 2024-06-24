@@ -4,7 +4,7 @@ import { authMiddleware,adminMiddleware, roleMiddleware } from "../middleWares/a
 
 
 const chiefRouter: Router = Router();
-chiefRouter.get('/events',[authMiddleware,adminMiddleware],allevents);
+chiefRouter.get('/events',[authMiddleware,roleMiddleware],allevents);
 chiefRouter.get('/user-count',[authMiddleware,roleMiddleware],userCount)
 chiefRouter.get('/total-approved',[authMiddleware,roleMiddleware],countApprovedForms)
 chiefRouter.get('/total-denied',[authMiddleware,roleMiddleware],countDeniedForms);

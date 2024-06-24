@@ -14,85 +14,95 @@ export interface Request extends ExpressRequest {
 
 
 
-
-
 export const assignInspector = async (req: Request, res: Response) => {
-    const { uniqueFormID, email } = req.body;
-  
-    try {
+  const { uniqueFormID, email } = req.body;
+
+  try {
       const userId = req.user?.id;
       if (!userId) {
-        return res.status(401).json({ message: 'User not authenticated' });
+          return res.status(401).json({ message: 'User not authenticated' });
       }
-  
+
       const user = await db.user.findUnique({
-        where: { id: userId },
+          where: { id: userId },
       });
       if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+          return res.status(404).json({ message: 'User not found' });
       }
-  
+
       const userEmail = user.email;
-  
+
       const secretary = await db.secretary.findUnique({
-        where: { email: userEmail! },
+          where: { email: userEmail! },
       });
       if (!secretary) {
-        return res.status(404).json({ success: false, message: 'Secretary not found for the user' });
+          return res.status(404).json({ success: false, message: 'Secretary not found for the user' });
       }
-  
+
       const secretaryId = secretary.secretaryId;
-  
+
       const inspector = await db.inspector.findUnique({
-        where: { email },
+          where: { email },
       });
       if (!inspector) {
-        return res.status(403).json({ success: false, message: 'User is not an inspector' });
+          return res.status(403).json({ success: false, message: 'User is not an inspector' });
       }
-  
-      // Check if the uniqueFormID exists in either Application or OrganizationForm
+
       const assignedApplication = await db.application.findUnique({
-        where: { uniqueFormID },
-        include: { documents: true }
+          where: { uniqueFormID },
+          include: { documents: true }
       });
       const assignedOrganizationForm = await db.organizationForm.findUnique({
-        where: { uniqueFormID },
-        include: {documents: true}
+          where: { uniqueFormID },
+          include: { documents: true }
       });
-  
+
       if (!assignedApplication && !assignedOrganizationForm) {
-        return res.status(404).json({ success: false, message: 'Form not found' });
+          return res.status(404).json({ success: false, message: 'Form not found' });
       }
-  
 
       const createdAssignment = await db.assignment.create({
-        data: {
-          uniqueFormID,
-          secretaryId,
-          isAssigned: true,
-        },
-      });
-  
-  
-      const invitation = await db.invitation.create({
-        data: {
-          assignmentId: createdAssignment.uniqueFormID,
-          inspectors: {
-            connect: { inspectorId: inspector.inspectorId },
+          data: {
+              uniqueFormID,
+              secretaryId,
+              isAssigned: true,
           },
-        },
       });
- 
+
+      if (assignedApplication) {
+          await db.application.update({
+              where: { uniqueFormID },
+              data: {
+                  state: 'ASSIGNED',
+              },
+          });
+      } else if (assignedOrganizationForm) {
+          await db.organizationForm.update({
+              where: { uniqueFormID },
+              data: {
+                  state: 'ASSIGNED',
+              },
+          });
+      }
+
+      const invitation = await db.invitation.create({
+          data: {
+              assignmentId: createdAssignment.uniqueFormID,
+              inspectors: {
+                  connect: { inspectorId: inspector.inspectorId },
+              },
+          },
+      });
+
       const assignedForm = assignedApplication || assignedOrganizationForm;
-  
-      return res.status(200).json({ success: true, message: 'Form assigned successfully',invitation, assignedForm });
-    } catch (error) {
+
+      return res.status(200).json({ success: true, message: 'Form assigned successfully', invitation, assignedForm });
+  } catch (error) {
       console.error('Error occurred while assigning form:', error);
       return res.status(500).json({ success: false, message: 'An error occurred while processing your request' });
-    }
-  };
-  
-  
+  }
+};
+
 
 
 

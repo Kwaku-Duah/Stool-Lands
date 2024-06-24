@@ -32,7 +32,6 @@ const assignInspector = async (req, res) => {
         if (!inspector) {
             return res.status(403).json({ success: false, message: 'User is not an inspector' });
         }
-        // Check if the uniqueFormID exists in either Application or OrganizationForm
         const assignedApplication = await db_1.default.application.findUnique({
             where: { uniqueFormID },
             include: { documents: true }
@@ -51,6 +50,22 @@ const assignInspector = async (req, res) => {
                 isAssigned: true,
             },
         });
+        if (assignedApplication) {
+            await db_1.default.application.update({
+                where: { uniqueFormID },
+                data: {
+                    state: 'ASSIGNED',
+                },
+            });
+        }
+        else if (assignedOrganizationForm) {
+            await db_1.default.organizationForm.update({
+                where: { uniqueFormID },
+                data: {
+                    state: 'ASSIGNED',
+                },
+            });
+        }
         const invitation = await db_1.default.invitation.create({
             data: {
                 assignmentId: createdAssignment.uniqueFormID,

@@ -103,6 +103,7 @@ model Application {
   type                   String?
   documents              File[]
   status                 ApplicationStatus
+  state                  FormIssue         @default(UNASSIGNED)
   createdAt              DateTime          @default(now())
   User                   User              @relation(fields: [userId], references: [id])
   userId                 Int
@@ -129,10 +130,16 @@ model OrganizationForm {
   type                   String?
   documents              orgDocument[]
   status                 ApplicationStatus   @default(PENDING)
+  state                  FormIssue         @default(UNASSIGNED)
   createdAt              DateTime          @default(now())
   User                   User              @relation(fields: [userId], references: [id])
   userId                 Int
   formStatus             FormState         @default(NEW)
+}
+
+enum FormIssue {
+  ASSIGNED
+  UNASSIGNED
 }
 
 model File {
@@ -240,7 +247,7 @@ model Inspector {
 
 
 model Reason {
-  id          Int          @id @default(autoincrement())
+  id           Int          @id @default(autoincrement())
   uniqueFormID String      @unique
   InspectorId  String      
   reject       String?
