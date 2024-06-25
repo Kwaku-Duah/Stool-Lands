@@ -4,9 +4,10 @@ import { adminMiddleware, authMiddleware,roleMiddleware } from '../middleWares/a
 
 const userRoute: Router = Router()
 
-userRoute.get('/users',[authMiddleware,roleMiddleware], allUsers)
+userRoute.get('/users', [authMiddleware,roleMiddleware],allUsers)
 // route for admin/secretary
 userRoute.get('/forms',[authMiddleware,roleMiddleware],getAllForms)
+
 userRoute.get('/tickets',[authMiddleware,roleMiddleware],allTickets)
 
 userRoute.post('/user-deactivate',[authMiddleware,roleMiddleware], userDeactivate)

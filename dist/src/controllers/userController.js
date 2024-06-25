@@ -28,13 +28,44 @@ exports.allUsers = allUsers;
 const getAllForms = async (req, res) => {
     try {
         const applicationForms = await db_1.default.application.findMany({
-            include: { documents: true }
+            include: {
+                documents: true,
+            },
         });
         const organizationForms = await db_1.default.organizationForm.findMany({
-            include: { documents: true }
+            include: {
+                documents: true,
+            },
         });
         const forms = [...applicationForms, ...organizationForms];
-        res.status(200).json({ success: true, forms });
+        const formsWithInspectors = await Promise.all(forms.map(async (form) => {
+            const assignment = await db_1.default.assignment.findFirst({
+                where: {
+                    uniqueFormID: form.uniqueFormID,
+                },
+                include: {
+                    invitations: {
+                        include: {
+                            inspectors: {
+                                include: {
+                                    user: {
+                                        select: {
+                                            name: true,
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+            const inspectorName = assignment?.invitations[0]?.inspectors[0]?.user?.name || null;
+            return {
+                ...form,
+                inspectorName,
+            };
+        }));
+        res.status(200).json({ success: true, forms: formsWithInspectors });
     }
     catch (error) {
         console.error('Error occurred while fetching forms:', error);

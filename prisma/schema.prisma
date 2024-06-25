@@ -35,6 +35,8 @@ model User {
 
   OrganizationForm OrganizationForm[]
   activeStatus     Boolean            @default(true)
+
+  Inspector Inspector?
 }
 
 model payableService {
@@ -108,6 +110,8 @@ model Application {
   User                   User              @relation(fields: [userId], references: [id])
   userId                 Int
   formStatus             FormState         @default(NEW)
+  inspector              Inspector?        @relation(fields: [inspectorId], references: [id])
+  inspectorId            Int?
 }
 
 model OrganizationForm {
@@ -129,12 +133,14 @@ model OrganizationForm {
   contactOfTransferor    String?
   type                   String?
   documents              orgDocument[]
-  status                 ApplicationStatus   @default(PENDING)
+  status                 ApplicationStatus @default(PENDING)
   state                  FormIssue         @default(UNASSIGNED)
   createdAt              DateTime          @default(now())
   User                   User              @relation(fields: [userId], references: [id])
   userId                 Int
   formStatus             FormState         @default(NEW)
+  inspector              Inspector?        @relation(fields: [inspectorId], references: [id])
+  inspectorId            Int?
 }
 
 enum FormIssue {
@@ -203,12 +209,12 @@ model Report {
 }
 
 model Ticket {
-  id          Int    @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   name        String
   email       String
   issue       String
-  createdAt   DateTime          @default(now())
-  appNumber   String?            
+  createdAt   DateTime      @default(now())
+  appNumber   String?
   priority    String
   description String
   status      TicketStatus  @default(PENDING)
@@ -216,13 +222,11 @@ model Ticket {
 }
 
 model TicketReply {
-  id          Int    @id @default(autoincrement())
-  response    String
-  ticketing   Ticket @relation(fields: [ticketId], references: [id])
-  ticketId    Int
+  id        Int    @id @default(autoincrement())
+  response  String
+  ticketing Ticket @relation(fields: [ticketId], references: [id])
+  ticketId  Int
 }
-
-
 
 enum TicketStatus {
   ADDRESSED
@@ -237,52 +241,52 @@ model Secretary {
 }
 
 model Inspector {
-  id          Int          @id @default(autoincrement())
-  email       String       @unique
-  inspectorId String       @unique
-  invitations Invitation[]
-  appointments Appointment[]
+  id                Int                @id @default(autoincrement())
+  email             String             @unique
+  inspectorId       String             @unique
+  invitations       Invitation[]
+  appointments      Appointment[]
+  applications      Application[]
+  organizationForms OrganizationForm[]
+  user              User?              @relation(fields: [email], references: [email])
 }
 
-
-
 model Reason {
-  id           Int          @id @default(autoincrement())
-  uniqueFormID String      @unique
-  InspectorId  String      
+  id           Int     @id @default(autoincrement())
+  uniqueFormID String  @unique
+  InspectorId  String
   reject       String?
 }
 
-
 model InspectUpload {
-  id          Int          @id @default(autoincrement())
-  uniqueFormID String      @unique
-  inspectorId  String    
-  documents   ProofDocuments[]
-  createdAt              DateTime          @default(now())
+  id           Int              @id @default(autoincrement())
+  uniqueFormID String           @unique
+  inspectorId  String
+  documents    ProofDocuments[]
+  createdAt    DateTime         @default(now())
 }
+
 model ProofDocuments {
-  id          Int          @id @default(autoincrement())
-  url         String
-  inspection  InspectUpload @relation(fields: [inspectUploadId], references: [id])
-  inspectUploadId  Int
+  id              Int           @id @default(autoincrement())
+  url             String
+  inspection      InspectUpload @relation(fields: [inspectUploadId], references: [id])
+  inspectUploadId Int
 }
 
 model Assignment {
   id           Int          @id @default(autoincrement())
   uniqueFormID String?      @unique
   secretaryId  String
-  timeAssigned              DateTime          @default(now())
+  timeAssigned DateTime     @default(now())
   isAssigned   Boolean      @default(false)
   secretary    Secretary    @relation(fields: [secretaryId], references: [secretaryId])
   invitations  Invitation[]
-
 }
 
 model Invitation {
   id           Int         @id @default(autoincrement())
   inspectors   Inspector[]
-  timeAssigned              DateTime          @default(now())
+  timeAssigned DateTime    @default(now())
   Assignment   Assignment? @relation(fields: [assignmentId], references: [uniqueFormID])
   assignmentId String?
 }
@@ -294,13 +298,12 @@ model Chief {
 }
 
 model Appointment {
-  id              Int        @id @default(autoincrement())
-  title           String
-  tag             String
-  applicantName   String
-  inspectorEmail  String
-  inspector       Inspector  @relation(fields: [inspectorId], references: [id])
-  inspectorId     Int
-  scheduledAt     DateTime?
+  id             Int       @id @default(autoincrement())
+  title          String
+  tag            String
+  applicantName  String
+  inspectorEmail String
+  inspector      Inspector @relation(fields: [inspectorId], references: [id])
+  inspectorId    Int
+  scheduledAt    DateTime?
 }
-

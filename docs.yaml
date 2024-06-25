@@ -2798,57 +2798,6 @@ paths:
 
 
 
-
-/status/delete:
-  summary: Delete an appointment (Admin)
-  description: Deletes an appointment by ID. Only admins can perform this operation.
-  tags:
-  security:
-    - bearerAuth: []
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          type: object
-          properties:
-            id:
-              type: integer
-              description: ID of the appointment to delete
-          required:
-            - id
-  responses:
-    '200':
-      description: Appointment deleted successfully
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Appointment deleted successfully
-    '404':
-      description: Appointment not found
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Appointment not found
-    '500':
-      description: An error occurred while processing your request
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              error:
-                type: string
-                example: An error occurred while processing your request
-
 /new/ticket-reply:
   post:
     summary: Respond to a Ticket
@@ -2908,3 +2857,66 @@ paths:
                   example: An error occurred while processing your request
     security:
       - bearerAuth: []
+
+
+
+
+/status/delete:
+  post:
+    summary: Delete an appointment (Authorized Users Only)
+    security:
+      - bearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: "The ID of the appointment to be deleted"
+                example: 123
+            required:
+              - id
+    responses:
+      '200':
+        description: "Appointment deleted successfully"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Appointment deleted successfully"
+      '400':
+        description: "Bad Request"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "ID is required"
+      '404':
+        description: "Appointment not found"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Appointment not found"
+      '500':
+        description: "Internal Server Error"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: "An error occurred while processing your request"

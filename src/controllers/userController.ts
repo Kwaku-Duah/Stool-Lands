@@ -36,21 +36,55 @@ export const allUsers = async (req: Request, res: Response) => {
 
 export const getAllForms = async (req: Request, res: Response) => {
   try {
-
+  
     const applicationForms = await db.application.findMany({
-      include: { documents: true }
+      include: {
+        documents: true,
+      },
     });
-
 
     const organizationForms = await db.organizationForm.findMany({
-      include: { documents: true }
+      include: {
+        documents: true,
+      },
     });
-
-
 
     const forms = [...applicationForms, ...organizationForms];
 
-    res.status(200).json({ success: true, forms });
+    const formsWithInspectors = await Promise.all(
+      forms.map(async (form) => {
+        const assignment = await db.assignment.findFirst({
+          where: {
+            uniqueFormID: form.uniqueFormID,
+          },
+          include: {
+            invitations: {
+              include: {
+                inspectors: {
+                  include: {
+                    user: {
+                      select: {
+                        name: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        const inspectorName =
+          assignment?.invitations[0]?.inspectors[0]?.user?.name || null;
+
+        return {
+          ...form,
+          inspectorName,
+        };
+      })
+    );
+
+    res.status(200).json({ success: true, forms: formsWithInspectors });
   } catch (error: any) {
     console.error('Error occurred while fetching forms:', error);
     res.status(500).json({ success: false, error: 'An error occurred while processing your request' });
