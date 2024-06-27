@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.userDeactivate = exports.userActivate = exports.allTickets = exports.specificForms = exports.getAllForms = exports.allUsers = void 0;
+exports.allInspectors = exports.deleteUser = exports.userDeactivate = exports.userActivate = exports.allTickets = exports.specificForms = exports.getAllForms = exports.allUsers = void 0;
 const db_1 = __importDefault(require("../dbConfig/db"));
 const allUsers = async (req, res) => {
     try {
@@ -192,3 +192,23 @@ const deleteUser = async (req, res) => {
     }
 };
 exports.deleteUser = deleteUser;
+const allInspectors = async (req, res) => {
+    try {
+        const inspectors = await db_1.default.user.findMany({
+            where: {
+                role: 'INSPECTOR'
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true
+            }
+        });
+        res.status(200).json(inspectors);
+    }
+    catch (error) {
+        console.error('Error fetching inspectors:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+};
+exports.allInspectors = allInspectors;

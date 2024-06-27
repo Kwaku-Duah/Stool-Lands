@@ -1,5 +1,5 @@
 import {Router}from 'express';
-import { allUsers, getAllForms, specificForms, userActivate,userDeactivate,deleteUser ,allTickets} from '../controllers/userController';
+import { allUsers, getAllForms, specificForms, userActivate,userDeactivate,deleteUser ,allTickets, allInspectors} from '../controllers/userController';
 import { adminMiddleware, authMiddleware,roleMiddleware } from '../middleWares/authMiddleware';
 
 const userRoute: Router = Router()

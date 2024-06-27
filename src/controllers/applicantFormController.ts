@@ -334,13 +334,13 @@ export const createTicket = async (req: Request, res: Response) => {
   try {
     const { name,email, issue,appNumber, priority, description } = req.body;
 
-    if (!name || !email || !issue || !priority || !description) {
+    if (!email || !issue || !priority || !description) {
       return res.status(400).json({ message: 'All these fields fields are required' });
     }
 
     const ticket = await db.ticket.create({
       data: {
-        name,
+        name:name ? name: null,
         email,
         issue,
         appNumber,
@@ -349,7 +349,9 @@ export const createTicket = async (req: Request, res: Response) => {
       }
     });
 
-    //  New to send this issue to the secretary
+
+
+
 
     res.status(201).json({ message: 'Your issue has been successfully raised', ticket });
   } catch (error) {

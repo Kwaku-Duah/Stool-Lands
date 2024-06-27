@@ -246,3 +246,22 @@ export const deleteUser = async (req: Request, res: Response) => {
   }
 };
 
+
+export const allInspectors = async (req:Request, res:Response) => {
+  try {
+    const inspectors = await db.user.findMany({
+      where: {
+        role: 'INSPECTOR'
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true
+      }
+    });
+    res.status(200).json(inspectors);
+  } catch (error) {
+    console.error('Error fetching inspectors:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
