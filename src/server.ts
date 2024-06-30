@@ -33,7 +33,7 @@ app.get('/hello', (req, res) => {
 
 app.use('/', rootRouter);
 app.get('/hi', (req, res) => {
-  res.send('Here we go!');
+  res.send('Is it working?');
 });
 
 

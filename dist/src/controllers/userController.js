@@ -38,7 +38,7 @@ const getAllForms = async (req, res) => {
             },
         });
         const forms = [...applicationForms, ...organizationForms];
-        const formsWithInspectors = await Promise.all(forms.map(async (form) => {
+        const formsWithInspectorsAndProofs = await Promise.all(forms.map(async (form) => {
             const assignment = await db_1.default.assignment.findFirst({
                 where: {
                     uniqueFormID: form.uniqueFormID,
@@ -60,12 +60,30 @@ const getAllForms = async (req, res) => {
                 },
             });
             const inspectorName = assignment?.invitations[0]?.inspectors[0]?.user?.name || null;
+            let proofDocuments = null;
+            let rejectReason = null;
+            if (form.status === 'APPROVED') {
+                const proof = await db_1.default.inspectUpload.findFirst({
+                    where: { uniqueFormID: form.uniqueFormID },
+                    include: { documents: true },
+                });
+                proofDocuments = proof?.documents || null;
+            }
+            if (form.status === 'DENIED') {
+                const reason = await db_1.default.reason.findFirst({
+                    where: { uniqueFormID: form.uniqueFormID },
+                    select: { reject: true },
+                });
+                rejectReason = reason?.reject || null;
+            }
             return {
                 ...form,
                 inspectorName,
+                proofDocuments,
+                rejectReason,
             };
         }));
-        res.status(200).json({ success: true, forms: formsWithInspectors });
+        res.status(200).json({ success: true, forms: formsWithInspectorsAndProofs });
     }
     catch (error) {
         console.error('Error occurred while fetching forms:', error);
@@ -96,7 +114,11 @@ const specificForms = async (req, res) => {
 exports.specificForms = specificForms;
 const allTickets = async (req, res) => {
     try {
-        const tickets = await db_1.default.ticket.findMany();
+        const tickets = await db_1.default.ticket.findMany({
+            include: {
+                replies: true
+            }
+        });
         if (tickets.length === 0) {
             return res.status(200).json({ message: 'No tickets yet' });
         }

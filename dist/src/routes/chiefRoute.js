@@ -8,5 +8,5 @@ chiefRouter.get('/events', [authMiddleware_1.authMiddleware, authMiddleware_1.ro
 chiefRouter.get('/user-count', [authMiddleware_1.authMiddleware, authMiddleware_1.roleMiddleware], chiefController_1.userCount);
 chiefRouter.get('/total-approved', [authMiddleware_1.authMiddleware, authMiddleware_1.roleMiddleware], chiefController_1.countApprovedForms);
 chiefRouter.get('/total-denied', [authMiddleware_1.authMiddleware, authMiddleware_1.roleMiddleware], chiefController_1.countDeniedForms);
-chiefRouter.delete('/delete', chiefController_1.deleteAppointment);
+chiefRouter.delete('/delete', [authMiddleware_1.authMiddleware, authMiddleware_1.roleMiddleware], chiefController_1.deleteAppointment);
 exports.default = chiefRouter;
