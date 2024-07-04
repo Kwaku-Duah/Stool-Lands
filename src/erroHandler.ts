@@ -4,6 +4,8 @@ import { InternalException } from './exceptions/internalException';
 
 type ExpressMiddleware = RequestHandler;
 
+
+
 export const errorHandler = (method: ExpressMiddleware): ExpressMiddleware => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {

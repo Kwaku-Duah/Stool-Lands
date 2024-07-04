@@ -10,8 +10,8 @@ const db_1 = __importDefault(require("../src/dbConfig/db"));
 const logMessage = (message) => {
     process.stdout.write(`${message}\n`);
 };
-const email = 'duah229@gmail.com';
-const phoneNumber = '233542370701';
+const email = 'duah229@gmail.co';
+const phoneNumber = '233542370702';
 async function seedScript() {
     const existingUserByEmail = await db_1.default.user.findFirst({
         where: {

@@ -10,8 +10,11 @@ COPY package.json yarn.lock ./
 COPY prisma/ ./prisma
 
 RUN yarn install
+
 RUN yarn prisma:generate
+
 # Copy the rest of the application source code to the working directory
+
 COPY . .
 
 # Expose the port your app runs on

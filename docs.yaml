@@ -2922,6 +2922,8 @@ paths:
                   example: "An error occurred while processing your request"
 
 
+
+
 /ins/inspectors:
   get:
     summary: Get all inspectors
