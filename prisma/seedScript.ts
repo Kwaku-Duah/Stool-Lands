@@ -7,7 +7,7 @@ const logMessage = (message: string) => {
 };
 
 const email = 'duah229@gmail.co';
-const phoneNumber = '233542370702';
+const phoneNumber = '233542370708';
 
 export async function seedScript() {
   const existingUserByEmail = await db.user.findFirst({
