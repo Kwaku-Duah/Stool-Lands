@@ -63,7 +63,6 @@ const createChief = async (req, res) => {
 exports.createChief = createChief;
 const allevents = async (req, res) => {
     try {
-        console.log("Does it reach here?");
         const allAppointments = await db_1.default.appointment.findMany({
             include: {
                 inspector: true,

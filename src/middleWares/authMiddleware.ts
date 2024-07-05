@@ -101,6 +101,20 @@ export const roleMiddleware = (req: Request, res: Response, next: NextFunction) 
   }
 };
 
+export const mergedMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { role } = req.user as User;
+
+    if (role === 'ADMIN' || role === 'SECRETARY' || role === 'INSPECTOR') {
+      next();
+    } else {
+      return res.status(403).json({ error: 'Insufficient Privileges' });
+    }
+  } catch (error) {
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 export const inspectorMiddleware = (req: Request, res: Response, next: NextFunction) => {
   try {
     const { role } = req.user as User;

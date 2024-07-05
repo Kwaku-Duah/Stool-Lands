@@ -1,12 +1,12 @@
 import {Router}from 'express';
-import { allUsers, getAllForms, specificForms, userActivate,userDeactivate,deleteUser ,allTickets, allInspectors} from '../controllers/userController';
-import { adminMiddleware, authMiddleware,roleMiddleware } from '../middleWares/authMiddleware';
+import { allUsers, getAllForms, specificForms, userActivate,userDeactivate,deleteUser ,allTickets} from '../controllers/userController';
+import { authMiddleware,roleMiddleware,mergedMiddleware } from '../middleWares/authMiddleware';
 
 const userRoute: Router = Router()
 
 userRoute.get('/users', [authMiddleware,roleMiddleware],allUsers)
 // route for admin/secretary
-userRoute.get('/forms',[authMiddleware,roleMiddleware],getAllForms)
+userRoute.get('/forms',[authMiddleware,mergedMiddleware],getAllForms)
 
 userRoute.get('/tickets',[authMiddleware,roleMiddleware],allTickets)
 

@@ -76,7 +76,6 @@ export const createChief = async (req: Request, res: Response) => {
 export const allevents = async (req: Request, res: Response) => {
   try {
 
-    console.log("Does it reach here?")
 
     const allAppointments = await db.appointment.findMany({
       include: {

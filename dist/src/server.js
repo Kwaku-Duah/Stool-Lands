@@ -23,12 +23,8 @@ app.use((0, cors_1.default)({
     credentials: true
 }));
 app.use('/', routes_1.default);
-app.get('/hello', (req, res) => {
-    res.send('Hello to the pakyi lands, you are through, THIS MUST WORK');
-});
-app.use('/', routes_1.default);
 app.get('/hi', (req, res) => {
-    res.send('Boom');
+    res.send('Trial');
 });
 (0, swaggerDoc_1.default)(app);
 app.listen(secrets_1.PORT, () => {

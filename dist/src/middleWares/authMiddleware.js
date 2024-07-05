@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.permitMiddleware = exports.inspectorMiddleware = exports.roleMiddleware = exports.secretaryMiddleware = exports.applicantMiddleware = exports.adminMiddleware = exports.authMiddleware = void 0;
+exports.permitMiddleware = exports.inspectorMiddleware = exports.mergedMiddleware = exports.roleMiddleware = exports.secretaryMiddleware = exports.applicantMiddleware = exports.adminMiddleware = exports.authMiddleware = void 0;
 const jwt = __importStar(require("jsonwebtoken"));
 const secrets_1 = require("../secrets");
 const unAuthorised_1 = require("../exceptions/unAuthorised");
@@ -119,6 +119,21 @@ const roleMiddleware = (req, res, next) => {
     }
 };
 exports.roleMiddleware = roleMiddleware;
+const mergedMiddleware = (req, res, next) => {
+    try {
+        const { role } = req.user;
+        if (role === 'ADMIN' || role === 'SECRETARY' || role === 'INSPECTOR') {
+            next();
+        }
+        else {
+            return res.status(403).json({ error: 'Insufficient Privileges' });
+        }
+    }
+    catch (error) {
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
+exports.mergedMiddleware = mergedMiddleware;
 const inspectorMiddleware = (req, res, next) => {
     try {
         const { role } = req.user;
